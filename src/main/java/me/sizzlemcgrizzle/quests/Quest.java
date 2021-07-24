@@ -1,0 +1,198 @@
+package me.sizzlemcgrizzle.quests;
+
+import de.craftlancer.core.CLCore;
+import de.craftlancer.core.LambdaRunnable;
+import de.craftlancer.core.resourcepack.ResourcePackManager;
+import me.sizzlemcgrizzle.quests.menu.QuestStepsMenu;
+import me.sizzlemcgrizzle.quests.steps.QuestStep;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+public class Quest implements ConfigurationSerializable {
+    
+    private final String id;
+    private final String permission;
+    private final List<String> description;
+    private final List<QuestStep> steps;
+    private final Map<UUID, Long> completed;
+    private final Map<UUID, QuestProgress> progress;
+    private boolean isPublic = false;
+    private boolean isRepeatable = false;
+    private int timeout = 0;
+    
+    private QuestStepsMenu menu;
+    
+    public Quest(String id, String permission) {
+        this.id = id;
+        this.permission = permission;
+        this.steps = new ArrayList<>();
+        this.progress = new HashMap<>();
+        this.completed = new HashMap<>();
+        this.description = new ArrayList<>();
+        
+        start();
+    }
+    
+    public Quest(Map<String, Object> map) {
+        this.id = (String) map.get("id");
+        this.permission = (String) map.get("permission");
+        this.steps = (List<QuestStep>) map.get("steps");
+        this.progress = ((Map<String, QuestProgress>) map.get("progress")).entrySet().stream()
+                .collect(Collectors.toMap(e -> UUID.fromString(e.getKey()), Map.Entry::getValue));
+        this.isPublic = (boolean) map.get("isPublic");
+        this.isRepeatable = (boolean) map.get("isRepeatable");
+        this.completed = ((Map<String, Long>) map.get("completed")).entrySet().stream()
+                .collect(Collectors.toMap(e -> UUID.fromString(e.getKey()), Map.Entry::getValue));
+        this.description = (List<String>) map.get("description");
+        this.timeout = (int) map.getOrDefault("timeout", 0);
+        
+        start();
+    }
+    
+    private void start() {
+        new LambdaRunnable(() -> progress.forEach((uuid, p) -> {
+            Player player = Bukkit.getPlayer(uuid);
+            
+            if (player == null)
+                return;
+            
+            if (!ResourcePackManager.getInstance().isFullyAccepted(player))
+                return;
+            
+            String emoji = CLCore.getInstance().getNavigationManager().getUnicode(player, steps.get(p.getStepID()).getLocation());
+            
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(emoji + ChatColor.GOLD + " " + steps.get(p.getStepID()).getCompassDescription()));
+        })).runTaskTimer(QuestsPlugin.getInstance(), 0, 3);
+    }
+    
+    @NotNull
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> map = new HashMap<>();
+        
+        map.put("id", id);
+        map.put("permission", permission);
+        map.put("steps", steps);
+        map.put("progress", progress.entrySet().stream().collect(Collectors.toMap(a -> a.getKey().toString(), Map.Entry::getValue)));
+        map.put("isPublic", isPublic);
+        map.put("isRepeatable", isRepeatable);
+        map.put("completed", completed.entrySet().stream().collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue)));
+        map.put("description", description);
+        map.put("timeout", timeout);
+        
+        return map;
+    }
+    
+    public String getId() {
+        return id;
+    }
+    
+    public String getPermission() {
+        return permission;
+    }
+    
+    public List<QuestStep> getSteps() {
+        return steps;
+    }
+    
+    public Map<UUID, QuestProgress> getProgress() {
+        return progress;
+    }
+    
+    public boolean isPublic() {
+        return isPublic;
+    }
+    
+    public void setPublic(boolean aPublic) {
+        isPublic = aPublic;
+    }
+    
+    public boolean isRepeatable() {
+        return isRepeatable;
+    }
+    
+    public void setRepeatable(boolean repeatable) {
+        isRepeatable = repeatable;
+    }
+    
+    public boolean hasCompleted(Player player) {
+        return completed.containsKey(player.getUniqueId());
+    }
+    
+    public List<String> getDescription() {
+        return description;
+    }
+    
+    public void completeStep(Player player) {
+        QuestProgress p = progress.get(player.getUniqueId());
+        
+        int nextStepID = p.getStepID() + 1;
+        
+        if (nextStepID == steps.size()) {
+            progress.remove(player.getUniqueId());
+            
+            completed.put(player.getUniqueId(), System.currentTimeMillis());
+            
+            QuestsPlugin.getInstance().getQuestMenu().getPlayerMenus().remove(player.getUniqueId());
+            
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.GOLD + "Quest complete!"));
+            return;
+        }
+        
+        p.setCompletedWeight(0);
+        p.setStepID(nextStepID);
+    }
+    
+    public boolean canStartQuest(Player player) {
+        return canStartQuest(player, null);
+    }
+    
+    public boolean canStartQuest(Player player, QuestStep step) {
+        
+        if (step != null && !steps.get(0).equals(step))
+            return false;
+        
+        if (QuestsPlugin.getInstance().getQuests().stream().anyMatch(p -> p.getProgress().containsKey(player.getUniqueId())))
+            return false;
+        
+        if (!isPublic())
+            return false;
+        
+        if (!isRepeatable() || completed.getOrDefault(player.getUniqueId(), 0L) + timeout * 1000 > System.currentTimeMillis())
+            return false;
+        
+        return player.hasPermission(permission);
+    }
+    
+    public int getTimeout() {
+        return timeout;
+    }
+    
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
+    
+    public void start(Player player) {
+        progress.put(player.getUniqueId(), new QuestProgress());
+        QuestsPlugin.getInstance().getQuestMenu().getPlayerMenus().remove(player.getUniqueId());
+    }
+    
+    public QuestStepsMenu getMenu() {
+        if (menu == null)
+            menu = new QuestStepsMenu(QuestsPlugin.getInstance(), this);
+        
+        return menu;
+    }
+}

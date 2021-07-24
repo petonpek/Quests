@@ -1,0 +1,13 @@
+name: Quests
+main: me.sizzlemcgrizzle.quests.QuestsPlugin
+version: ${project.version}
+api-version: 1.16
+depend: [ WorldGuard, MythicMobs, Citizens, CLCore, CLStuff ]
+commands:
+  quests:
+    description: Main command handler for quests
+  avatar:
+    description: Main command handler for avatars
+permissions:
+  quests.admin:
+    default: op

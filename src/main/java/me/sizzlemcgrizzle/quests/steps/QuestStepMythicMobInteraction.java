@@ -1,0 +1,101 @@
+package me.sizzlemcgrizzle.quests.steps;
+
+import de.craftlancer.core.menu.MenuItem;
+import de.craftlancer.core.util.ItemBuilder;
+import de.craftlancer.core.util.MessageLevel;
+import de.craftlancer.core.util.MessageUtil;
+import io.lumine.xikage.mythicmobs.MythicMobs;
+import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
+import io.lumine.xikage.mythicmobs.mobs.MythicMob;
+import me.sizzlemcgrizzle.quests.Quest;
+import me.sizzlemcgrizzle.quests.QuestsPlugin;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+public class QuestStepMythicMobInteraction extends QuestStepItem {
+    
+    private MythicMob mythicMob;
+    
+    public QuestStepMythicMobInteraction(Quest quest, Location location, MythicMob mob) {
+        super(quest, location, new ItemStack(Material.AIR));
+        
+        this.mythicMob = mob;
+    }
+    
+    public QuestStepMythicMobInteraction(Map<String, Object> map) {
+        super(map);
+        
+        this.mythicMob = MythicMobs.inst().getMobManager().getMythicMob((String) map.get("name"));
+    }
+    
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> map = super.serialize();
+        
+        map.put("name", mythicMob.getInternalName());
+        
+        return map;
+    }
+    
+    @EventHandler
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+        Player player = event.getPlayer();
+        Entity entity = event.getRightClicked();
+        
+        Optional<ActiveMob> optional = MythicMobs.inst().getMobManager().getActiveMobs().stream()
+                .filter(a -> a.getEntity().getBukkitEntity().getUniqueId().equals(entity.getUniqueId())).findFirst();
+        
+        if (!optional.isPresent())
+            return;
+        
+        if (!optional.get().getType().equals(mythicMob))
+            return;
+        
+        if (getQuest().canStartQuest(event.getPlayer(), this))
+            getQuest().start(event.getPlayer());
+        
+        if (isPlayerOnStep(player))
+            if (takeItems(player))
+                onStepAction(player, 1);
+    }
+    
+    @Override
+    protected List<MenuItem> getConfigurationButtons() {
+        List<MenuItem> list = super.getConfigurationButtons();
+        
+        list.add(new MenuItem(new ItemBuilder(Material.SKELETON_SKULL).setDisplayName("&e&lChange Mythic Mob")
+                .setLore("", "&7Mythic mob name: &6" + mythicMob.getInternalName(), "", "&8→ &6Click to set mythic mob").build()).addClickAction(click -> {
+            Player player = click.getPlayer();
+            player.closeInventory();
+            
+            MessageUtil.sendMessage(QuestsPlugin.getInstance(), player, MessageLevel.INFO, "Select a mythic mob.");
+            QuestsPlugin.getInstance().getUserInputManager().getMythicMobInput(player, mob -> {
+                mythicMob = mob;
+                
+                createMenu(getQuest());
+                display(player, getQuest());
+            });
+        }));
+        
+        return list;
+    }
+    
+    @Override
+    protected Material getMenuMaterial() {
+        return Material.SKELETON_SKULL;
+    }
+    
+    @Override
+    public ItemStack getMenuItem() {
+        return new ItemBuilder(super.getMenuItem()).setDisplayName("&e&lMythic Mob Interaction").build();
+    }
+}
