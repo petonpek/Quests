@@ -45,7 +45,7 @@ public class QuestStepAdminShopTrade extends QuestStep {
     
     @EventHandler
     public void onAdminShopTrade(AdminShopTransactionEvent event) {
-        if (!event.getLocation().equals(getLocation()))
+        if (!event.getShop().getLocation().equals(getLocation()))
             return;
         
         if (!rows.contains(event.getRow()))

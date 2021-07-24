@@ -1,7 +1,7 @@
 package me.sizzlemcgrizzle.quests;
 
-import de.craftlancer.core.CLCore;
 import de.craftlancer.core.LambdaRunnable;
+import de.craftlancer.core.navigation.NavigationUtil;
 import de.craftlancer.core.resourcepack.ResourcePackManager;
 import me.sizzlemcgrizzle.quests.menu.QuestStepsMenu;
 import me.sizzlemcgrizzle.quests.steps.QuestStep;
@@ -71,7 +71,7 @@ public class Quest implements ConfigurationSerializable {
             if (!ResourcePackManager.getInstance().isFullyAccepted(player))
                 return;
             
-            String emoji = CLCore.getInstance().getNavigationManager().getUnicode(player, steps.get(p.getStepID()).getLocation());
+            String emoji = NavigationUtil.getUnicode(player, steps.get(p.getStepID()).getLocation());
             
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(emoji + ChatColor.GOLD + " " + steps.get(p.getStepID()).getCompassDescription()));
         })).runTaskTimer(QuestsPlugin.getInstance(), 0, 3);
