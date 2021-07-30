@@ -70,7 +70,7 @@ public class QuestStepMythicMobKill extends QuestStep {
             Player player = click.getPlayer();
             
             MessageUtil.sendMessage(QuestsPlugin.getInstance(), player, MessageLevel.INFO, "Select an active mythic mob.");
-            QuestsPlugin.getInstance().getUserInputManager().getMythicMobInput(player, mob -> {
+            QuestsPlugin.getInstance().getUserInputManager().getMythicMobInput(player, (mob, active) -> {
                 mythicMob = mob;
                 
                 createMenu(getQuest());

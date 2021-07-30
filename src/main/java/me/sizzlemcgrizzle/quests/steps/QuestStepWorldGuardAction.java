@@ -61,11 +61,11 @@ public class QuestStepWorldGuardAction extends QuestStep {
         
         if (isPlayerOnStep(event.getPlayer()))
             onStepAction(event.getPlayer(), 1);
-        
-        if (getQuest().canStartQuest(event.getPlayer(), this)) {
-            getQuest().start(event.getPlayer());
-            onStepAction(event.getPlayer(), 1);
-        }
+
+//        if (getQuest().canStartQuest(event.getPlayer(), this)) {
+//            getQuest().start(event.getPlayer());
+//            onStepAction(event.getPlayer(), 1);
+//        }
     }
     
     @EventHandler
@@ -81,11 +81,6 @@ public class QuestStepWorldGuardAction extends QuestStep {
         
         if (isPlayerOnStep(event.getPlayer()))
             onStepAction(event.getPlayer(), 1);
-        
-        if (getQuest().canStartQuest(event.getPlayer(), this)) {
-            getQuest().start(event.getPlayer());
-            onStepAction(event.getPlayer(), 1);
-        }
     }
     
     @Override

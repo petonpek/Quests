@@ -1,7 +1,6 @@
 package me.sizzlemcgrizzle.quests.command;
 
 import de.craftlancer.core.Utils;
-import de.craftlancer.core.command.CommandUtils;
 import de.craftlancer.core.command.SubCommand;
 import de.craftlancer.core.util.MessageLevel;
 import de.craftlancer.core.util.MessageUtil;
@@ -14,13 +13,14 @@ import org.bukkit.command.CommandSender;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class QuestsCreateCommand extends SubCommand {
+public class QuestsSetColorCommand extends SubCommand {
     
     private QuestsPlugin plugin;
     
-    public QuestsCreateCommand(QuestsPlugin plugin) {
+    public QuestsSetColorCommand(QuestsPlugin plugin) {
         super("quests.admin", plugin, false);
         
         this.plugin = plugin;
@@ -29,14 +29,10 @@ public class QuestsCreateCommand extends SubCommand {
     @Override
     protected List<String> onTabComplete(CommandSender sender, String[] args) {
         
-        args = CommandUtils.parseArgumentStrings(args);
-        
         if (args.length == 2)
-            return Collections.singletonList("<name>");
+            return Utils.getMatches(args[1], plugin.getQuests().stream().map(Quest::getId).collect(Collectors.toList()));
         if (args.length == 3)
             return Utils.getMatches(args[2], Arrays.stream(org.bukkit.ChatColor.values()).map(Enum::name).collect(Collectors.toList()));
-        if (args.length == 4)
-            return Collections.singletonList("<permission>");
         
         return Collections.emptyList();
     }
@@ -48,26 +44,23 @@ public class QuestsCreateCommand extends SubCommand {
             return null;
         }
         
-        if (args.length < 2) {
-            MessageUtil.sendMessage(plugin, sender, MessageLevel.INFO, "You must enter a quest name.");
+        if (args.length < 3) {
+            MessageUtil.sendMessage(plugin, sender, MessageLevel.INFO, "You must enter a quest name and color.");
             return null;
         }
         
-        String name, permission = "";
-        ChatColor chatColor = ChatColor.DARK_PURPLE;
+        Optional<Quest> quest = plugin.getQuest(args[1]);
+        ChatColor chatColor = ChatColor.of(args[2]);
         
-        name = args[1];
+        if (!quest.isPresent()) {
+            MessageUtil.sendMessage(plugin, sender, MessageLevel.INFO, "The quest you entered does not exist.");
+            return null;
+        }
         
-        if (args.length > 2)
-            chatColor = ChatColor.of(args[2]);
+        quest.get().setColor(chatColor);
         
-        if (args.length > 3)
-            permission = args[3];
         
-        plugin.getQuests().add(new Quest(name, chatColor, permission));
-        plugin.getQuestMenu().getPlayerMenus().clear();
-        
-        MessageUtil.sendMessage(plugin, sender, MessageLevel.SUCCESS, "Successfully added new quest. To use this quest, switch visibility to public.");
+        MessageUtil.sendMessage(plugin, sender, MessageLevel.SUCCESS, "Successfully set quest color.");
         return null;
     }
     

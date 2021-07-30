@@ -7,8 +7,10 @@ import de.craftlancer.core.util.MessageUtil;
 import me.sizzlemcgrizzle.quests.Quest;
 import me.sizzlemcgrizzle.quests.QuestsPlugin;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
+import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemStack;
@@ -20,10 +22,12 @@ public class QuestStepNPCInteraction extends QuestStepItem {
     
     private int id;
     
-    public QuestStepNPCInteraction(Quest quest, Location location, int id) {
-        super(quest, location, new ItemStack(Material.AIR));
+    public QuestStepNPCInteraction(Quest quest, Location location, NPC npc) {
+        super(quest, location,
+                npc.getEntity() instanceof LivingEntity ? ((LivingEntity) npc.getEntity()).getEyeLocation() : npc.getEntity().getLocation(),
+                new ItemStack(Material.AIR));
         
-        this.id = id;
+        this.id = npc.getId();
     }
     
     public QuestStepNPCInteraction(Map<String, Object> map) {
@@ -45,14 +49,16 @@ public class QuestStepNPCInteraction extends QuestStepItem {
     public void onEntityInteract(NPCRightClickEvent event) {
         if (event.getNPC().getId() != id)
             return;
-        
-        
-        if (getQuest().canStartQuest(event.getClicker(), this))
-            getQuest().start(event.getClicker());
+
+
+//        if (getQuest().canStartQuest(event.getClicker(), this))
+//            getQuest().start(event.getClicker());
         
         if (isPlayerOnStep(event.getClicker()))
-            if (takeItems(event.getClicker()))
+            if (takeItems(event.getClicker())) {
                 onStepAction(event.getClicker(), 1);
+                event.setCancelled(true);
+            }
     }
     
     @Override

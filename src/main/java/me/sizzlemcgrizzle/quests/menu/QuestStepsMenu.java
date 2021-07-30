@@ -30,20 +30,25 @@ public class QuestStepsMenu implements Listener {
     }
     
     public void createMenu() {
+        int[] index = {0};
         this.menu = new PagedMenu(plugin, "Quest Steps", true, 6,
                 quest.getSteps().stream().map(step -> {
                     ItemBuilder builder = new ItemBuilder(step.getMenuItem());
                     
                     builder.addLore("&8→ &6Left click to edit",
+                            "&8→ &6Right click to add quest step to the left",
                             "&8→ &6Shift right click to delete");
                     
+                    int val = index[0]++;
+                    
                     return new MenuItem(builder.build()).addClickAction(click -> step.display(click.getPlayer(), quest), ClickType.LEFT)
+                            .addClickAction(click -> selectionMenu.display(click.getPlayer(), val), ClickType.RIGHT)
                             .addClickAction(click -> {
                                 quest.getSteps().remove(step);
                                 
                                 createMenu();
                                 display(click.getPlayer());
-                            });
+                            }, ClickType.SHIFT_RIGHT);
                 }).collect(Collectors.toList()), true);
         
         menu.setInfoItem(new MenuItem(new ItemBuilder(Material.DIAMOND_BLOCK).setDisplayName("&e&lQuest Steps Page")
@@ -54,7 +59,7 @@ public class QuestStepsMenu implements Listener {
                         "&8→ &6Right click to toggle public",
                         "&8→ &6Shift left click to toggle repeatable",
                         "&8→ &6Shift right click to set timeout").build())
-                .addClickAction(click -> selectionMenu.display(click.getPlayer(), quest), ClickType.LEFT)
+                .addClickAction(click -> selectionMenu.display(click.getPlayer(), quest.getSteps().size()), ClickType.LEFT)
                 .addClickAction(click -> {
                     Player player = click.getPlayer();
                     
@@ -93,8 +98,8 @@ public class QuestStepsMenu implements Listener {
     
     public void display(Player player) {
         if (menu == null) {
-            createMenu();
             selectionMenu = new QuestStepsSelectionMenu(plugin, quest);
+            createMenu();
         }
         
         menu.display(player);

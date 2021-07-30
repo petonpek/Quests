@@ -9,6 +9,8 @@ public class AvatarConversationCommandHandler extends SubCommandHandler {
         super("quests.admin", plugin, false, 1);
         
         registerSubCommand("next", new AvatarConversationNextCommand(plugin));
+        registerSubCommand("assign", new AvatarConversationAssignCommand(plugin));
+        registerSubCommand("remove", new AvatarConversationRemoveCommand(plugin));
     }
     
     @Override

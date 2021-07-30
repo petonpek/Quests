@@ -18,6 +18,8 @@ public class AvatarConversationNextCommand extends SubCommand {
     
     public AvatarConversationNextCommand(QuestsPlugin plugin) {
         super("", plugin, false);
+        
+        this.plugin = plugin;
     }
     
     @Override
@@ -44,13 +46,16 @@ public class AvatarConversationNextCommand extends SubCommand {
         
         Player player = (Player) sender;
         
-        QuestsPlugin.getInstance().getQuests().stream().filter(quest -> quest.getProgress().containsKey(player.getUniqueId()))
+        plugin.getQuests().stream().filter(quest -> quest.getProgress().containsKey(player.getUniqueId()))
                 .findFirst().ifPresent(quest -> {
             AvatarConversation conversation = quest.getSteps().get(quest.getProgress().get(player.getUniqueId()).getStepID()).getConversation();
             
             if (conversation.getId().equals(id))
                 conversation.next(player);
         });
+        
+        plugin.getNPCConversations().values().stream().filter(a -> a.getId().equals(id)).findFirst().ifPresent(a -> a.next(player));
+        plugin.getMythicMobConversations().values().stream().filter(a -> a.getId().equals(id)).findFirst().ifPresent(a -> a.next(player));
         
         return null;
     }

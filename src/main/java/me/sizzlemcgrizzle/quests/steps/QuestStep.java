@@ -43,7 +43,15 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
         this(quest, location, 1);
     }
     
+    public QuestStep(Quest quest, Location location, Location conversationLocation) {
+        this(quest, location, conversationLocation, 1);
+    }
+    
     public QuestStep(Quest quest, Location location, int weight) {
+        this(quest, location, null, weight);
+    }
+    
+    public QuestStep(Quest quest, Location location, Location conversationLocation, int weight) {
         this.questName = quest.getId();
         this.location = location;
         this.totalWeight = weight;
@@ -51,7 +59,7 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
         this.conversation = new AvatarConversation(UUID.randomUUID().toString(), player -> {
             getQuest().completeStep(player);
             reward.reward(player);
-        });
+        }, conversationLocation);
         
         Bukkit.getPluginManager().registerEvents(this, QuestsPlugin.getInstance());
     }
@@ -119,7 +127,7 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
     
     public Quest getQuest() {
         if (quest == null)
-            quest = QuestsPlugin.getInstance().getQuest(questName);
+            quest = QuestsPlugin.getInstance().getQuest(questName).orElse(null);
         
         return quest;
     }
@@ -212,7 +220,7 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
         MenuItem conversationButton = new MenuItem(new ItemBuilder(Material.SPRUCE_SIGN).setDisplayName("&e&lEdit Conversation")
                 .setLore("", "&8→ &6Click to edit conversation").build()).addClickAction(click -> {
             Player player = click.getPlayer();
-            conversation.display(player, this);
+            conversation.display(player);
         });
         
         configurationMenu.set(0, locationButton);

@@ -31,14 +31,13 @@ public class QuestStepsSelectionMenu {
         this.quest = quest;
     }
     
-    public void display(Player player, Quest quest) {
-        if (menu == null)
-            createMenu(quest);
+    public void display(Player player, int index) {
+        createMenu(index);
         
         player.openInventory(menu.getInventory());
     }
     
-    public void createMenu(Quest quest) {
+    public void createMenu(int index) {
         this.menu = new Menu(plugin, "Step Selection", 1);
         
         ItemStack blockInteractionItem = new ItemBuilder(Material.STONE_BRICKS).setDisplayName("&e&lBlock Interaction").build();
@@ -55,7 +54,7 @@ public class QuestStepsSelectionMenu {
             MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "Click a block to set quest step location.");
             plugin.getUserInputManager()
                     .getBlockInput(player, block -> {
-                        quest.getSteps().add(new QuestStepBlockInteract(quest, block.getLocation()));
+                        quest.getSteps().add(index, new QuestStepBlockInteract(quest, block.getLocation()));
                         quest.getMenu().createMenu();
                         quest.getMenu().display(player);
                     });
@@ -69,7 +68,7 @@ public class QuestStepsSelectionMenu {
             plugin.getUserInputManager().getBlockInput(player, block -> {
                 MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "Right click an npc...");
                 plugin.getUserInputManager().getNPCInput(player, npc -> {
-                    quest.getSteps().add(new QuestStepNPCInteraction(quest, block.getLocation(), npc.getId()));
+                    quest.getSteps().add(index, new QuestStepNPCInteraction(quest, block.getLocation(), npc));
                     quest.getMenu().createMenu();
                     quest.getMenu().display(player);
                 });
@@ -83,10 +82,10 @@ public class QuestStepsSelectionMenu {
             MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "Click a block to set quest step location.");
             plugin.getUserInputManager().getBlockInput(player, block -> {
                 MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "Select an active mythic mob.");
-                plugin.getUserInputManager().getMythicMobInput(player, mob -> {
+                plugin.getUserInputManager().getMythicMobInput(player, (mob, active) -> {
                     plugin.getUserInputManager().getInput(player, new UserInputManager.NumberInputPrompt("&bEnter the amount of mythic mobs of this type to kill...", null,
                             d -> {
-                                quest.getSteps().add(new QuestStepMythicMobKill(quest, block.getLocation(), mob, d.intValue()));
+                                quest.getSteps().add(index, new QuestStepMythicMobKill(quest, block.getLocation(), mob, d.intValue()));
                                 quest.getMenu().createMenu();
                                 quest.getMenu().display(player);
                             }, () -> quest.getMenu().display(player)));
@@ -103,7 +102,7 @@ public class QuestStepsSelectionMenu {
                 plugin.getUserInputManager().getInput(player, new UserInputManager.StringInputPrompt("&bEnter a valid world guard region...",
                         string -> WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).hasRegion(string),
                         string -> {
-                            quest.getSteps().add(new QuestStepWorldGuardAction(quest, block.getLocation(), string));
+                            quest.getSteps().add(index, new QuestStepWorldGuardAction(quest, block.getLocation(), string));
                             quest.getMenu().createMenu();
                             quest.getMenu().display(player);
                         }, () -> quest.getMenu().display(player)));
@@ -117,8 +116,8 @@ public class QuestStepsSelectionMenu {
             MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "Click a block to set quest step location.");
             plugin.getUserInputManager().getBlockInput(player, block -> {
                 MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "Select an active mythic mob.");
-                plugin.getUserInputManager().getMythicMobInput(player, mob -> {
-                    quest.getSteps().add(new QuestStepMythicMobInteraction(quest, block.getLocation(), mob));
+                plugin.getUserInputManager().getMythicMobInput(player, (mob, active) -> {
+                    quest.getSteps().add(index, new QuestStepMythicMobInteraction(quest, block.getLocation(), active));
                     quest.getMenu().createMenu();
                     quest.getMenu().display(player);
                 });
@@ -132,7 +131,7 @@ public class QuestStepsSelectionMenu {
             MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "Click a block to set quest step location.");
             plugin.getUserInputManager()
                     .getBlockInput(player, block -> {
-                        quest.getSteps().add(new QuestStepAdminShopTrade(quest, block.getLocation()));
+                        quest.getSteps().add(index, new QuestStepAdminShopTrade(quest, block.getLocation()));
                         quest.getMenu().createMenu();
                         quest.getMenu().display(player);
                     });

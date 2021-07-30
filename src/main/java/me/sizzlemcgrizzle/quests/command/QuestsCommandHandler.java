@@ -1,10 +1,12 @@
 package me.sizzlemcgrizzle.quests.command;
 
 import de.craftlancer.core.command.CommandHandler;
+import de.craftlancer.core.command.CommandUtils;
 import me.sizzlemcgrizzle.quests.QuestsPlugin;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+
+import java.util.List;
 
 public class QuestsCommandHandler extends CommandHandler {
     
@@ -15,15 +17,13 @@ public class QuestsCommandHandler extends CommandHandler {
         
         this.plugin = plugin;
         
+        registerSubCommand("edit", new QuestsEditCommand(plugin));
         registerSubCommand("create", new QuestsCreateCommand(plugin));
+        registerSubCommand("setColor", new QuestsSetColorCommand(plugin));
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        
-        if (sender instanceof Player && (!sender.hasPermission("quests.admin") || args.length == 0))
-            plugin.getQuestMenu().display((Player) sender);
-        
-        return super.onCommand(sender, cmd, label, args);
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
+        return super.onTabComplete(sender, cmd, label, CommandUtils.parseArgumentStrings(args));
     }
 }

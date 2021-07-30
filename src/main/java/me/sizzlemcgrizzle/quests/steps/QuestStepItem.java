@@ -24,6 +24,18 @@ public abstract class QuestStepItem extends QuestStep {
         this.item = item;
     }
     
+    public QuestStepItem(Quest quest, Location location, Location conversationLocation, ItemStack item) {
+        super(quest, location, conversationLocation);
+        
+        this.item = item;
+    }
+    
+    public QuestStepItem(Quest quest, Location location, Location conversationLocation, int weight, ItemStack item) {
+        super(quest, location, conversationLocation, weight);
+        
+        this.item = item;
+    }
+    
     public QuestStepItem(Quest quest, Location location, int weight, ItemStack item) {
         super(quest, location, weight);
         

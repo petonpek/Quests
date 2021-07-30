@@ -55,11 +55,11 @@ public class QuestStepAdminShopTrade extends QuestStep {
         
         if (isPlayerOnStep(player))
             onStepAction(player, 1);
-        
-        if (getQuest().canStartQuest(event.getPlayer(), this)) {
-            getQuest().start(event.getPlayer());
-            onStepAction(player, 1);
-        }
+
+//        if (getQuest().canStartQuest(event.getPlayer(), this)) {
+//            getQuest().start(event.getPlayer());
+//            onStepAction(player, 1);
+//        }
     }
     
     @Override

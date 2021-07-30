@@ -13,9 +13,9 @@ import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.ConversationFactory;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.StringPrompt;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -34,7 +35,7 @@ public class UserInputManager implements Listener {
     private final QuestsPlugin plugin;
     private final Map<UUID, Consumer<NPC>> inputMapNPC = new HashMap<>();
     private final Map<UUID, Consumer<Block>> inputMapBlock = new HashMap<>();
-    private final Map<UUID, Consumer<MythicMob>> inputMapMythicMob = new HashMap<>();
+    private final Map<UUID, BiConsumer<MythicMob, ActiveMob>> inputMapMythicMob = new HashMap<>();
     
     public UserInputManager(QuestsPlugin plugin) {
         this.plugin = plugin;
@@ -42,41 +43,41 @@ public class UserInputManager implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
     
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onNPCInteract(NPCRightClickEvent event) {
-        if (inputMapNPC.containsKey(event.getClicker().getUniqueId())) {
-            inputMapNPC.get(event.getClicker().getUniqueId()).accept(event.getNPC());
-            inputMapNPC.remove(event.getClicker().getUniqueId());
-        }
+        Optional.ofNullable(inputMapNPC.remove(event.getClicker().getUniqueId())).ifPresent(c -> {
+            event.setCancelled(true);
+            c.accept(event.getNPC());
+        });
     }
     
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockInteract(PlayerInteractEvent event) {
         if (!event.hasBlock())
             return;
         
-        if (inputMapBlock.containsKey(event.getPlayer().getUniqueId())) {
-            inputMapBlock.get(event.getPlayer().getUniqueId()).accept(event.getClickedBlock());
-            inputMapBlock.remove(event.getPlayer().getUniqueId());
-        }
+        Optional.ofNullable(inputMapBlock.remove(event.getPlayer().getUniqueId())).ifPresent(c -> {
+            c.accept(event.getClickedBlock());
+            event.setCancelled(true);
+        });
     }
     
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
-        Entity entity = event.getRightClicked();
         
         if (!inputMapMythicMob.containsKey(player.getUniqueId()))
             return;
         
-        Optional<ActiveMob> optional = MythicMobs.inst().getMobManager().getActiveMobs().stream()
-                .filter(a -> a.getEntity().getBukkitEntity().getUniqueId().equals(entity.getUniqueId())).findFirst();
+        ActiveMob active = MythicMobs.inst().getAPIHelper().getMythicMobInstance(event.getRightClicked());
         
-        if (!optional.isPresent())
+        if (active == null)
             return;
         
-        inputMapMythicMob.get(player.getUniqueId()).accept(optional.get().getType());
-        inputMapMythicMob.remove(player.getUniqueId());
+        Optional.ofNullable(inputMapMythicMob.remove(player.getUniqueId())).ifPresent(c -> {
+            c.accept(active.getType(), active);
+            event.setCancelled(true);
+        });
     }
     
     public void getNPCInput(Player player, Consumer<NPC> consumer) {
@@ -87,7 +88,7 @@ public class UserInputManager implements Listener {
         inputMapBlock.put(player.getUniqueId(), consumer);
     }
     
-    public void getMythicMobInput(Player player, Consumer<MythicMob> consumer) {
+    public void getMythicMobInput(Player player, BiConsumer<MythicMob, ActiveMob> consumer) {
         inputMapMythicMob.put(player.getUniqueId(), consumer);
     }
     

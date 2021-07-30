@@ -28,25 +28,28 @@ public class Quest implements ConfigurationSerializable {
     private final List<QuestStep> steps;
     private final Map<UUID, Long> completed;
     private final Map<UUID, QuestProgress> progress;
+    private ChatColor color;
     private boolean isPublic = false;
     private boolean isRepeatable = false;
     private int timeout = 0;
     
     private QuestStepsMenu menu;
     
-    public Quest(String id, String permission) {
+    public Quest(String id, ChatColor color, String permission) {
         this.id = id;
         this.permission = permission;
         this.steps = new ArrayList<>();
         this.progress = new HashMap<>();
         this.completed = new HashMap<>();
         this.description = new ArrayList<>();
+        this.color = color;
         
         start();
     }
     
     public Quest(Map<String, Object> map) {
         this.id = (String) map.get("id");
+        this.color = ChatColor.of((String) map.getOrDefault("color", "DARK_PURPLE"));
         this.permission = (String) map.get("permission");
         this.steps = (List<QuestStep>) map.get("steps");
         this.progress = ((Map<String, QuestProgress>) map.get("progress")).entrySet().stream()
@@ -84,6 +87,7 @@ public class Quest implements ConfigurationSerializable {
         
         map.put("id", id);
         map.put("permission", permission);
+        map.put("color", color.getName());
         map.put("steps", steps);
         map.put("progress", progress.entrySet().stream().collect(Collectors.toMap(a -> a.getKey().toString(), Map.Entry::getValue)));
         map.put("isPublic", isPublic);
@@ -97,6 +101,14 @@ public class Quest implements ConfigurationSerializable {
     
     public String getId() {
         return id;
+    }
+    
+    public ChatColor getColor() {
+        return color;
+    }
+    
+    public void setColor(ChatColor color) {
+        this.color = color;
     }
     
     public String getPermission() {
@@ -156,13 +168,6 @@ public class Quest implements ConfigurationSerializable {
     }
     
     public boolean canStartQuest(Player player) {
-        return canStartQuest(player, null);
-    }
-    
-    public boolean canStartQuest(Player player, QuestStep step) {
-        
-        if (step != null && !steps.get(0).equals(step))
-            return false;
         
         if (QuestsPlugin.getInstance().getQuests().stream().anyMatch(p -> p.getProgress().containsKey(player.getUniqueId())))
             return false;
@@ -170,7 +175,7 @@ public class Quest implements ConfigurationSerializable {
         if (!isPublic())
             return false;
         
-        if (!isRepeatable() || completed.getOrDefault(player.getUniqueId(), 0L) + timeout * 1000 > System.currentTimeMillis())
+        if (!isRepeatable() || completed.getOrDefault(player.getUniqueId(), 0L) + timeout * 1000L > System.currentTimeMillis())
             return false;
         
         return player.hasPermission(permission);
@@ -183,6 +188,7 @@ public class Quest implements ConfigurationSerializable {
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
+    
     
     public void start(Player player) {
         progress.put(player.getUniqueId(), new QuestProgress());

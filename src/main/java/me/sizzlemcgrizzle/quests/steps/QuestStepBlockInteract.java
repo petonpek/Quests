@@ -33,11 +33,11 @@ public class QuestStepBlockInteract extends QuestStepItem {
         if (isPlayerOnStep(event.getPlayer()))
             if (takeItems(event.getPlayer()))
                 onStepAction(event.getPlayer(), 1);
-        
-        if (getQuest().canStartQuest(event.getPlayer(), this)) {
-            getQuest().start(event.getPlayer());
-            onStepAction(event.getPlayer(), 1);
-        }
+
+//        if (getQuest().canStartQuest(event.getPlayer(), this)) {
+//            getQuest().start(event.getPlayer());
+//            onStepAction(event.getPlayer(), 1);
+//        }
     }
     
     @Override

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.sizzlemcgrizzle</groupId>
     <artifactId>quests</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <name>Quests</name>
 
     <properties>
@@ -53,11 +53,6 @@
             <version>0.5.0-SNAPSHOT</version>
         </dependency>
 
-        <dependency>
-            <groupId>de.craftlancer</groupId>
-            <artifactId>clstuff</artifactId>
-            <version>0.3.0-SNAPSHOT</version>
-        </dependency>
         <dependency>
             <groupId>de.craftlancer</groupId>
             <artifactId>clstuff</artifactId>

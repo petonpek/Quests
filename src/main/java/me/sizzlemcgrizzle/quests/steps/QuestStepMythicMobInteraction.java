@@ -11,7 +11,7 @@ import me.sizzlemcgrizzle.quests.Quest;
 import me.sizzlemcgrizzle.quests.QuestsPlugin;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -19,16 +19,19 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class QuestStepMythicMobInteraction extends QuestStepItem {
     
     private MythicMob mythicMob;
     
-    public QuestStepMythicMobInteraction(Quest quest, Location location, MythicMob mob) {
-        super(quest, location, new ItemStack(Material.AIR));
+    public QuestStepMythicMobInteraction(Quest quest, Location location, ActiveMob active) {
+        super(quest, location,
+                active.getEntity().getBukkitEntity() instanceof LivingEntity ?
+                        ((LivingEntity) active.getEntity().getBukkitEntity()).getEyeLocation()
+                        : active.getEntity().getBukkitEntity().getLocation(),
+                new ItemStack(Material.AIR));
         
-        this.mythicMob = mob;
+        this.mythicMob = active.getType();
     }
     
     public QuestStepMythicMobInteraction(Map<String, Object> map) {
@@ -49,23 +52,23 @@ public class QuestStepMythicMobInteraction extends QuestStepItem {
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
-        Entity entity = event.getRightClicked();
         
-        Optional<ActiveMob> optional = MythicMobs.inst().getMobManager().getActiveMobs().stream()
-                .filter(a -> a.getEntity().getBukkitEntity().getUniqueId().equals(entity.getUniqueId())).findFirst();
+        ActiveMob active = MythicMobs.inst().getAPIHelper().getMythicMobInstance(event.getRightClicked());
         
-        if (!optional.isPresent())
+        if (active == null)
             return;
         
-        if (!optional.get().getType().equals(mythicMob))
+        if (!active.getType().equals(mythicMob))
             return;
-        
-        if (getQuest().canStartQuest(event.getPlayer(), this))
-            getQuest().start(event.getPlayer());
+
+//        if (getQuest().canStartQuest(event.getPlayer(), this))
+//            getQuest().start(event.getPlayer());
         
         if (isPlayerOnStep(player))
-            if (takeItems(player))
+            if (takeItems(player)) {
                 onStepAction(player, 1);
+                event.setCancelled(true);
+            }
     }
     
     @Override
@@ -78,7 +81,7 @@ public class QuestStepMythicMobInteraction extends QuestStepItem {
             player.closeInventory();
             
             MessageUtil.sendMessage(QuestsPlugin.getInstance(), player, MessageLevel.INFO, "Select a mythic mob.");
-            QuestsPlugin.getInstance().getUserInputManager().getMythicMobInput(player, mob -> {
+            QuestsPlugin.getInstance().getUserInputManager().getMythicMobInput(player, (mob, active) -> {
                 mythicMob = mob;
                 
                 createMenu(getQuest());

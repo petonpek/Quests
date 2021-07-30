@@ -38,7 +38,7 @@ public class AvatarMessage implements ConfigurationSerializable {
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         
-        map.put("avatar", avatarName);
+        map.put("avatar", getAvatar().getName());
         map.put("lines", lines);
         map.put("lastTextLine", lastTextLine);
         
