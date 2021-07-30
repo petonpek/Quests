@@ -1,7 +1,6 @@
 package me.sizzlemcgrizzle.quests.dialogue;
 
 import de.craftlancer.core.resourcepack.TranslateSpaceFont;
-import me.sizzlemcgrizzle.quests.QuestsPlugin;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +18,6 @@ public class AvatarMessage implements ConfigurationSerializable {
     private List<String> lines;
     //2 <= x <= 4
     private int lastTextLine = 2;
-    private String avatarName;
     private Avatar avatar;
     
     public AvatarMessage(Avatar avatar, String message) {
@@ -28,7 +26,7 @@ public class AvatarMessage implements ConfigurationSerializable {
     }
     
     public AvatarMessage(Map<String, Object> map) {
-        this.avatarName = map.get("avatar").toString();
+        this.avatar = (Avatar) map.get("avatar");
         this.lines = (List<String>) map.get("lines");
         this.lastTextLine = (int) map.getOrDefault("lastTextLine", 2);
     }
@@ -38,7 +36,7 @@ public class AvatarMessage implements ConfigurationSerializable {
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         
-        map.put("avatar", getAvatar().getName());
+        map.put("avatar", avatar);
         map.put("lines", lines);
         map.put("lastTextLine", lastTextLine);
         
@@ -89,9 +87,6 @@ public class AvatarMessage implements ConfigurationSerializable {
     }
     
     public Avatar getAvatar() {
-        if (avatar == null)
-            avatar = QuestsPlugin.getInstance().getAvatars().stream().filter(a -> a.getName().equals(avatarName)).findFirst().get();
-        
         return avatar;
     }
 }
