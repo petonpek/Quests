@@ -36,6 +36,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,8 +48,8 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
     private List<Quest> quests;
     private List<Avatar> avatars;
     
-    private Map<MythicMob, AssignedConversation> mythicMobConversations;
-    private Map<Integer, AssignedConversation> npcConversations;
+    private Map<MythicMob, AssignedConversation> mythicMobConversations = new HashMap<>();
+    private Map<Integer, AssignedConversation> npcConversations = new HashMap<>();
     
     private QuestsOverviewMenu questMenu;
     private UserInputManager userInputManager;
