@@ -36,10 +36,11 @@ public class AvatarConversation implements ConfigurationSerializable {
     private final List<AvatarMessage> messages;
     private final String id;
     private final Map<UUID, Integer> conversing = new HashMap<>();
+    private final List<UUID> onCooldown = new ArrayList<>();
+    private final Location location;
     private List<BaseComponent[]> formattedMessages;
     private Consumer<Player> onComplete;
     private PagedMenu menu;
-    private Location location;
     
     public AvatarConversation(String id, @Nullable Location location) {
         this(id, null, location);
@@ -99,6 +100,9 @@ public class AvatarConversation implements ConfigurationSerializable {
     }
     
     public void next(Player player) {
+        if (onCooldown.contains(player.getUniqueId()))
+            return;
+        
         if (messages.size() == 0) {
             complete(player);
             return;
@@ -123,6 +127,8 @@ public class AvatarConversation implements ConfigurationSerializable {
     private void complete(Player player) {
         if (onComplete != null)
             onComplete.accept(player);
+        onCooldown.add(player.getUniqueId());
+        new LambdaRunnable(() -> onCooldown.remove(player.getUniqueId())).runTaskLater(QuestsPlugin.getInstance(), getCooldown());
         conversing.remove(player.getUniqueId());
     }
     
@@ -198,6 +204,10 @@ public class AvatarConversation implements ConfigurationSerializable {
     
     protected PagedMenu getConversationMenu() {
         return menu;
+    }
+    
+    protected int getCooldown() {
+        return 0;
     }
     
     protected void createMenu() {

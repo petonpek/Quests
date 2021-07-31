@@ -111,8 +111,8 @@ public class Quest implements ConfigurationSerializable {
         this.color = color;
     }
     
-    public String getPermission() {
-        return permission;
+    public boolean playerHasPermission(Player player) {
+        return permission.equals("") || player.hasPermission(permission);
     }
     
     public List<QuestStep> getSteps() {

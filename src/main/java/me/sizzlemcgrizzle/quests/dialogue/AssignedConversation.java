@@ -57,6 +57,11 @@ public class AssignedConversation extends AvatarConversation {
     }
     
     @Override
+    protected int getCooldown() {
+        return 21;
+    }
+    
+    @Override
     protected void createMenu() {
         super.createMenu();
         
@@ -107,7 +112,7 @@ public class AssignedConversation extends AvatarConversation {
     }
     
     public void displayQuestMenu(Player player) {
-        List<Quest> availableQuests = quests.stream().filter(q -> q.isPublic() && player.hasPermission(q.getPermission())).collect(Collectors.toList());
+        List<Quest> availableQuests = quests.stream().filter(q -> q.isPublic() && q.playerHasPermission(player)).collect(Collectors.toList());
         
         Menu menu = new Menu(QuestsPlugin.getInstance(),
                 ResourcePackManager.getInstance().isFullyAccepted(player) ?

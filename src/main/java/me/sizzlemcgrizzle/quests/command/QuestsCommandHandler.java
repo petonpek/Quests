@@ -10,16 +10,13 @@ import java.util.List;
 
 public class QuestsCommandHandler extends CommandHandler {
     
-    private QuestsPlugin plugin;
-    
     public QuestsCommandHandler(QuestsPlugin plugin) {
         super(plugin);
-        
-        this.plugin = plugin;
         
         registerSubCommand("edit", new QuestsEditCommand(plugin));
         registerSubCommand("create", new QuestsCreateCommand(plugin));
         registerSubCommand("setColor", new QuestsSetColorCommand(plugin));
+        registerSubCommand("abandon", new QuestsAbandonCommand(plugin));
     }
     
     @Override

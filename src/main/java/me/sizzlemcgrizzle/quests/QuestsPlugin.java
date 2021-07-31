@@ -77,7 +77,7 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
         ConfigurationSerialization.registerClass(AvatarConversation.class);
         ConfigurationSerialization.registerClass(AssignedConversation.class);
         
-        MessageUtil.register(this, new TextComponent("§8[§eQuests§8]"));
+        MessageUtil.register(this, new TextComponent("§8[§cQuests§8]"));
         
         getCommand("quests").setExecutor(new QuestsCommandHandler(this));
         getCommand("avatar").setExecutor(new AvatarCommandHandler(this));
