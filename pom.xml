@@ -17,7 +17,6 @@
             <id>spigot-repo</id>
             <url>http://hub.spigotmc.org/nexus/content/groups/public/</url>
         </repository>
-
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
@@ -85,6 +84,13 @@
             <groupId>net.raidstone</groupId>
             <artifactId>WorldGuardEvents</artifactId>
             <version>1.16.4</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>me.sizzlemcgrizzle</groupId>
+            <artifactId>blueprints</artifactId>
+            <version>1.7.6</version>
             <scope>provided</scope>
         </dependency>
 

@@ -15,6 +15,7 @@ import me.sizzlemcgrizzle.quests.menu.QuestsOverviewMenu;
 import me.sizzlemcgrizzle.quests.steps.QuestStep;
 import me.sizzlemcgrizzle.quests.steps.QuestStepAdminShopTrade;
 import me.sizzlemcgrizzle.quests.steps.QuestStepBlockInteract;
+import me.sizzlemcgrizzle.quests.steps.QuestStepBlueprintPlace;
 import me.sizzlemcgrizzle.quests.steps.QuestStepMythicMobInteraction;
 import me.sizzlemcgrizzle.quests.steps.QuestStepMythicMobKill;
 import me.sizzlemcgrizzle.quests.steps.QuestStepNPCInteraction;
@@ -72,6 +73,7 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
         ConfigurationSerialization.registerClass(QuestStepWorldGuardAction.class);
         ConfigurationSerialization.registerClass(QuestStepMythicMobInteraction.class);
         ConfigurationSerialization.registerClass(QuestStepAdminShopTrade.class);
+        ConfigurationSerialization.registerClass(QuestStepBlueprintPlace.class);
         ConfigurationSerialization.registerClass(Avatar.class);
         ConfigurationSerialization.registerClass(AvatarMessage.class);
         ConfigurationSerialization.registerClass(AvatarConversation.class);

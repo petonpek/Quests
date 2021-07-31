@@ -96,8 +96,8 @@ public abstract class QuestStepItem extends QuestStep {
             
             item = player.getInventory().getItemInMainHand().clone();
             
-            createMenu(getQuest());
-            display(player, getQuest());
+            createMenu();
+            display(player);
         }));
         
         return list;

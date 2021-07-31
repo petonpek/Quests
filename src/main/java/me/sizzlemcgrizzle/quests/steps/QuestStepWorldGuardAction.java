@@ -61,11 +61,11 @@ public class QuestStepWorldGuardAction extends QuestStep {
         
         if (isPlayerOnStep(event.getPlayer()))
             onStepAction(event.getPlayer(), 1);
-
-//        if (getQuest().canStartQuest(event.getPlayer(), this)) {
-//            getQuest().start(event.getPlayer());
-//            onStepAction(event.getPlayer(), 1);
-//        }
+        
+        if (getQuest().canStartQuest(event.getPlayer(), this)) {
+            getQuest().start(event.getPlayer());
+            onStepAction(event.getPlayer(), 1);
+        }
     }
     
     @EventHandler
@@ -101,17 +101,17 @@ public class QuestStepWorldGuardAction extends QuestStep {
                             string -> {
                                 regionName = string;
                                 
-                                createMenu(null);
-                                display(player, null);
-                            }, () -> display(player, null)));
+                                createMenu();
+                                display(player);
+                            }, () -> display(player)));
                 }),
                 new MenuItem(new ItemBuilder(Material.OAK_DOOR).setDisplayName("&e&lToggle Action")
                         .setLore("", "&7Action: &6" + (entry ? "entry" : "exit"), "", "&8→ &6Click to toggle action").build()).addClickAction(click -> {
                     Player player = click.getPlayer();
                     
                     entry = !entry;
-                    createMenu(getQuest());
-                    display(player, getQuest());
+                    createMenu();
+                    display(player);
                 }));
     }
     

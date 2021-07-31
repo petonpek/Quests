@@ -54,6 +54,9 @@ public class QuestStepMythicMobKill extends QuestStep {
         if (!event.getMobType().equals(mythicMob))
             return;
         
+        if (getQuest().canStartQuest(player, this))
+            getQuest().start(player);
+        
         if (isPlayerOnStep(player))
             onStepAction(player, 1);
     }
@@ -73,8 +76,8 @@ public class QuestStepMythicMobKill extends QuestStep {
             QuestsPlugin.getInstance().getUserInputManager().getMythicMobInput(player, (mob, active) -> {
                 mythicMob = mob;
                 
-                createMenu(getQuest());
-                display(player, getQuest());
+                createMenu();
+                display(player);
             });
         }));
     }

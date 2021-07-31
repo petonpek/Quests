@@ -185,7 +185,7 @@ public class QuestReward implements ConfigurationSerializable {
         MenuItem exitButton = new MenuItem(new ItemBuilder(Material.BARRIER).setDisplayName("&e&lGo back")
                 .setLore("", "&8→ &6Click to return to main menu").build()).addClickAction(click -> {
             Player player = click.getPlayer();
-            questStep.display(player, questStep.getQuest());
+            questStep.display(player);
         });
         
         menu.set(0, itemButton);

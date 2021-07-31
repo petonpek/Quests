@@ -49,10 +49,10 @@ public class QuestStepNPCInteraction extends QuestStepItem {
     public void onEntityInteract(NPCRightClickEvent event) {
         if (event.getNPC().getId() != id)
             return;
-
-
-//        if (getQuest().canStartQuest(event.getClicker(), this))
-//            getQuest().start(event.getClicker());
+        
+        
+        if (getQuest().canStartQuest(event.getClicker(), this))
+            getQuest().start(event.getClicker());
         
         if (isPlayerOnStep(event.getClicker()))
             if (takeItems(event.getClicker())) {
@@ -75,8 +75,8 @@ public class QuestStepNPCInteraction extends QuestStepItem {
             QuestsPlugin.getInstance().getUserInputManager().getNPCInput(player, npc -> {
                 id = npc.getId();
                 
-                createMenu(getQuest());
-                display(player, getQuest());
+                createMenu();
+                display(player);
             });
         }));
         

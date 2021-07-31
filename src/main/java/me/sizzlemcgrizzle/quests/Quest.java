@@ -32,6 +32,7 @@ public class Quest implements ConfigurationSerializable {
     private boolean isPublic = false;
     private boolean isRepeatable = false;
     private int timeout = 0;
+    private boolean startAutomatically = false;
     
     private QuestStepsMenu menu;
     
@@ -60,6 +61,7 @@ public class Quest implements ConfigurationSerializable {
                 .collect(Collectors.toMap(e -> UUID.fromString(e.getKey()), Map.Entry::getValue));
         this.description = (List<String>) map.get("description");
         this.timeout = (int) map.getOrDefault("timeout", 0);
+        this.startAutomatically = (boolean) map.getOrDefault("startAutomatically", false);
         
         start();
     }
@@ -71,9 +73,11 @@ public class Quest implements ConfigurationSerializable {
             if (player == null)
                 return;
             
-            String emoji = ResourcePackManager.getInstance().isFullyAccepted(player) ? NavigationUtil.getUnicode(player, steps.get(p.getStepID()).getLocation()) : "";
+            QuestStep step = steps.get(p.getStepID());
             
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(emoji + ChatColor.GOLD + " " + steps.get(p.getStepID()).getCompassDescription()));
+            String emoji = step.isShowingCompass() && ResourcePackManager.getInstance().isFullyAccepted(player) ? NavigationUtil.getUnicode(player, steps.get(p.getStepID()).getLocation()) : "";
+            
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(emoji + ChatColor.GOLD + " " + steps.get(p.getStepID()).getCompassDescription(player)));
         })).runTaskTimer(QuestsPlugin.getInstance(), 0, 3);
     }
     
@@ -92,6 +96,7 @@ public class Quest implements ConfigurationSerializable {
         map.put("completed", completed.entrySet().stream().collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue)));
         map.put("description", description);
         map.put("timeout", timeout);
+        map.put("startAutomatically", startAutomatically);
         
         return map;
     }
@@ -144,6 +149,14 @@ public class Quest implements ConfigurationSerializable {
         return description;
     }
     
+    public boolean startsAutomatically() {
+        return startAutomatically;
+    }
+    
+    public void setStartsAutomatically(boolean startAutomatically) {
+        this.startAutomatically = startAutomatically;
+    }
+    
     public void completeStep(Player player) {
         QuestProgress p = progress.get(player.getUniqueId());
         
@@ -176,6 +189,10 @@ public class Quest implements ConfigurationSerializable {
             return false;
         
         return playerHasPermission(player);
+    }
+    
+    public boolean canStartQuest(Player player, QuestStep step) {
+        return startsAutomatically() && steps.get(0).equals(step) && canStartQuest(player);
     }
     
     public int getTimeout() {

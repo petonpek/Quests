@@ -31,7 +31,11 @@ public class AssignedConversation extends AvatarConversation {
     public AssignedConversation(String id, Location location) {
         super(id, location);
         
-        setOnComplete(player -> new LambdaRunnable(() -> displayQuestMenu(player)).runTaskLater(QuestsPlugin.getInstance(), 20));
+        setOnComplete(player -> new LambdaRunnable(() -> {
+            if (!quests.isEmpty())
+                displayQuestMenu(player);
+        }).runTaskLater(QuestsPlugin.getInstance(), 20));
+        
         this.quests = new ArrayList<>();
     }
     
@@ -40,7 +44,10 @@ public class AssignedConversation extends AvatarConversation {
         
         this.quests = (List<Quest>) map.get("quests");
         
-        setOnComplete(player -> new LambdaRunnable(() -> displayQuestMenu(player)).runTaskLater(QuestsPlugin.getInstance(), 20));
+        setOnComplete(player -> new LambdaRunnable(() -> {
+            if (!quests.isEmpty())
+                displayQuestMenu(player);
+        }).runTaskLater(QuestsPlugin.getInstance(), 20));
     }
     
     @NotNull
@@ -141,7 +148,7 @@ public class AssignedConversation extends AvatarConversation {
                             quest.start(click.getPlayer());
                             player.closeInventory();
                         } else {
-                            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_FALL, 0.5F, 1F);
+                            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5F, 1F);
                         }
                     }));
             }

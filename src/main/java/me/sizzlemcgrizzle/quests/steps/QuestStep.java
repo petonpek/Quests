@@ -18,6 +18,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -34,6 +35,7 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
     private Quest quest;
     private Menu configurationMenu;
     
+    private boolean showCompass = true;
     private String compassDescription = "";
     private int totalWeight;
     
@@ -75,6 +77,7 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
             getQuest().completeStep(player);
             reward.reward(player);
         });
+        this.showCompass = (boolean) map.getOrDefault("showCompass", true);
         
         Bukkit.getPluginManager().registerEvents(this, QuestsPlugin.getInstance());
     }
@@ -89,6 +92,7 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
         map.put("totalWeight", totalWeight);
         map.put("compassDescription", compassDescription);
         map.put("conversation", conversation);
+        map.put("showCompass", showCompass);
         
         return map;
     }
@@ -117,8 +121,12 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
             conversation.next(player);
     }
     
-    public String getCompassDescription() {
-        return compassDescription;
+    public String getCompassDescription(Player player) {
+        return compassDescription
+                .replace("%weight_total%", "" + totalWeight)
+                .replace("%weight_left%", "" + (totalWeight - getQuest().getProgress().get(player.getUniqueId()).getCompletedWeight()))
+                .replace("%weight_complete%", "" + getQuest().getProgress().get(player.getUniqueId()).getCompletedWeight())
+                .replace("%player%", player.getName());
     }
     
     public void setCompassDescription(String compassDescription) {
@@ -130,6 +138,10 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
             quest = QuestsPlugin.getInstance().getQuest(questName).orElse(null);
         
         return quest;
+    }
+    
+    public boolean isShowingCompass() {
+        return showCompass;
     }
     
     public int getTotalWeight() {
@@ -155,14 +167,14 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
         return builder.build();
     }
     
-    public void display(Player player, Quest quest) {
+    public void display(Player player) {
         if (configurationMenu == null)
-            createMenu(quest);
+            createMenu();
         
         player.openInventory(configurationMenu.getInventory());
     }
     
-    public void createMenu(Quest quest) {
+    public void createMenu() {
         List<MenuItem> buttons = getConfigurationButtons();
         
         int rows = ((buttons.size() + 6) / 10) + 1;
@@ -181,21 +193,23 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
                     .getBlockInput(player, block -> {
                         setLocation(block.getLocation());
                         
-                        createMenu(quest);
-                        display(player, quest);
+                        createMenu();
+                        display(player);
                     });
         });
         
         MenuItem weightButton = new MenuItem(new ItemBuilder(Material.IRON_BLOCK).setDisplayName("&e&lSet Total Weight")
                 .setLore("", "&7Total weight: &6" + totalWeight, "", "&8→ &6Click to set total weight").build()).addClickAction(click -> {
             Player player = click.getPlayer();
+            player.closeInventory();
+            
             QuestsPlugin.getInstance().getUserInputManager()
                     .getInput(player, new UserInputManager.NumberInputPrompt("&bEnter a number...", d -> d >= 1, d -> {
                         setTotalWeight(d.intValue());
                         
-                        createMenu(quest);
-                        display(player, quest);
-                    }, () -> display(player, quest)));
+                        createMenu();
+                        display(player);
+                    }, () -> display(player)));
         });
         
         MenuItem rewardButton = new MenuItem(new ItemBuilder(Material.EMERALD).setDisplayName("&e&lEdit Reward")
@@ -205,17 +219,29 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
         });
         
         MenuItem compassButton = new MenuItem(new ItemBuilder(Material.COMPASS).setDisplayName("&e&lSet Direction Description")
-                .setLore("", "&7Current information: &6" + compassDescription, "",
-                        "&8→ &6Click to set direction description").build()).addClickAction(click -> {
-            Player player = click.getPlayer();
-            QuestsPlugin.getInstance().getUserInputManager()
-                    .getInput(player, new UserInputManager.StringInputPrompt("&bEnter a description...", s -> true, s -> {
-                        setCompassDescription(s);
-                        
-                        createMenu(quest);
-                        display(player, quest);
-                    }, () -> display(player, quest)));
-        });
+                .setLore("",
+                        "&7Showing compass: " + (showCompass ? "&ayes" : "&cno"),
+                        "&7Current information: &6" + compassDescription, "",
+                        "&8→ &6Left click to set direction description",
+                        "&8→ &6Right click to toggle compass").build())
+                .addClickAction(click -> {
+                    Player player = click.getPlayer();
+                    player.closeInventory();
+                    
+                    QuestsPlugin.getInstance().getUserInputManager()
+                            .getInput(player, new UserInputManager.StringInputPrompt("&bEnter a description...", s -> true, s -> {
+                                setCompassDescription(s);
+                                
+                                createMenu();
+                                display(player);
+                            }, () -> display(player)));
+                }, ClickType.LEFT)
+                .addClickAction(click -> {
+                    showCompass = !showCompass;
+                    
+                    createMenu();
+                    display(click.getPlayer());
+                });
         
         MenuItem conversationButton = new MenuItem(new ItemBuilder(Material.SPRUCE_SIGN).setDisplayName("&e&lEdit Conversation")
                 .setLore("", "&8→ &6Click to edit conversation").build()).addClickAction(click -> {
@@ -240,7 +266,7 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
         MenuItem exitButton = new MenuItem(new ItemBuilder(Material.BARRIER).setDisplayName("&e&lGo back")
                 .setLore("", "&8→ &6Click to return to quest step menu").build()).addClickAction(click -> {
             Player player = click.getPlayer();
-            quest.getMenu().display(player);
+            getQuest().getMenu().display(player);
         });
         configurationMenu.set(exitSlot, exitButton);
     }

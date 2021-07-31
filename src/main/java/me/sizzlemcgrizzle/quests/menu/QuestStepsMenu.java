@@ -41,7 +41,7 @@ public class QuestStepsMenu implements Listener {
                     
                     int val = index[0]++;
                     
-                    return new MenuItem(builder.build()).addClickAction(click -> step.display(click.getPlayer(), quest), ClickType.LEFT)
+                    return new MenuItem(builder.build()).addClickAction(click -> step.display(click.getPlayer()), ClickType.LEFT)
                             .addClickAction(click -> selectionMenu.display(click.getPlayer(), val), ClickType.RIGHT)
                             .addClickAction(click -> {
                                 quest.getSteps().remove(step);
@@ -52,32 +52,15 @@ public class QuestStepsMenu implements Listener {
                 }).collect(Collectors.toList()), true);
         
         menu.setInfoItem(new MenuItem(new ItemBuilder(Material.DIAMOND_BLOCK).setDisplayName("&e&lQuest Steps Page")
-                .setLore("", "&7Public: " + ((quest.isPublic()) ? "&ayes" : "&cno"),
-                        "&7Repeatable: " + ((quest.isRepeatable()) ? "&ayes" : "&cno"),
+                .setLore("",
                         "&7Timeout: &6" + quest.getTimeout(),
                         "", "&8→ &6Left click to add step",
-                        "&8→ &6Right click to toggle public",
-                        "&8→ &6Shift left click to toggle repeatable",
-                        "&8→ &6Shift right click to set timeout").build())
+                        "&8→ &6Right click to set timeout").build())
                 .addClickAction(click -> selectionMenu.display(click.getPlayer(), quest.getSteps().size()), ClickType.LEFT)
                 .addClickAction(click -> {
                     Player player = click.getPlayer();
                     
-                    quest.setPublic(!quest.isPublic());
-                    createMenu();
-                    display(player);
-                }, ClickType.RIGHT)
-                .addClickAction(click -> {
-                    Player player = click.getPlayer();
-                    
-                    quest.setRepeatable(!quest.isRepeatable());
-                    createMenu();
-                    display(player);
-                }, ClickType.SHIFT_LEFT)
-                .addClickAction(click -> {
-                    Player player = click.getPlayer();
-                    
-                    new LambdaRunnable(() -> player.closeInventory()).runTaskLater(plugin, 1);
+                    new LambdaRunnable(player::closeInventory).runTaskLater(plugin, 1);
                     
                     plugin.getUserInputManager().getInput(player, new UserInputManager.NumberInputPrompt("&bEnter a positive number of seconds.",
                             d -> d >= 0, d -> {
@@ -87,13 +70,50 @@ public class QuestStepsMenu implements Listener {
                         createMenu();
                         display(player);
                     }, () -> display(player)));
-                }, ClickType.SHIFT_RIGHT));
+                }, ClickType.RIGHT));
         
-        menu.setInventoryUpdateHandler(m -> m.set(52, new MenuItem(new ItemBuilder(Material.BARRIER).setDisplayName("&e&lGo back")
-                .setLore("", "&8→ &6Click to return to quest step menu").build()).addClickAction(click -> {
-            Player player = click.getPlayer();
-            QuestsPlugin.getInstance().getQuestMenu().display(player);
-        })));
+        menu.addToolbarItem(0, new MenuItem(new ItemBuilder(quest.isRepeatable() ? Material.LIME_TERRACOTTA : Material.RED_TERRACOTTA)
+                .setDisplayName("&e&lSet Repeatable")
+                .setLore("", "&7Repeatable: " + ((quest.isRepeatable()) ? "&ayes" : "&cno"),
+                        "",
+                        "&8→ &6Click to toggle repeatable").build())
+                .addClickAction(click -> {
+                    quest.setRepeatable(!quest.isRepeatable());
+                    
+                    createMenu();
+                    display(click.getPlayer());
+                }));
+        
+        menu.addToolbarItem(1, new MenuItem(new ItemBuilder(quest.startsAutomatically() ? Material.LIME_TERRACOTTA : Material.RED_TERRACOTTA)
+                .setDisplayName("&e&lSet Automatic Start")
+                .setLore("", "&7Automatic start: " + ((quest.startsAutomatically()) ? "&ayes" : "&cno"),
+                        "",
+                        "&8→ &6Click to toggle automatic start").build())
+                .addClickAction(click -> {
+                    quest.setStartsAutomatically(!quest.startsAutomatically());
+                    
+                    createMenu();
+                    display(click.getPlayer());
+                }));
+        
+        menu.addToolbarItem(2, new MenuItem(new ItemBuilder(quest.isPublic() ? Material.LIME_TERRACOTTA : Material.RED_TERRACOTTA)
+                .setDisplayName("&e&lSet Public")
+                .setLore("", "&7Public: " + ((quest.isPublic()) ? "&ayes" : "&cno"),
+                        "",
+                        "&8→ &6Click to toggle public").build())
+                .addClickAction(click -> {
+                    quest.setPublic(!quest.isPublic());
+                    
+                    createMenu();
+                    display(click.getPlayer());
+                }));
+        
+        menu.addToolbarItem(8, new MenuItem(new ItemBuilder(Material.BARRIER).setDisplayName("&e&lGo back")
+                .setLore("", "&8→ &6Click to return to quest step menu").build())
+                .addClickAction(click -> {
+                    Player player = click.getPlayer();
+                    QuestsPlugin.getInstance().getQuestMenu().display(player);
+                }));
     }
     
     public void display(Player player) {

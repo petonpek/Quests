@@ -11,6 +11,7 @@ import me.sizzlemcgrizzle.quests.Quest;
 import me.sizzlemcgrizzle.quests.QuestsPlugin;
 import me.sizzlemcgrizzle.quests.steps.QuestStepAdminShopTrade;
 import me.sizzlemcgrizzle.quests.steps.QuestStepBlockInteract;
+import me.sizzlemcgrizzle.quests.steps.QuestStepBlueprintPlace;
 import me.sizzlemcgrizzle.quests.steps.QuestStepMythicMobInteraction;
 import me.sizzlemcgrizzle.quests.steps.QuestStepMythicMobKill;
 import me.sizzlemcgrizzle.quests.steps.QuestStepNPCInteraction;
@@ -46,6 +47,7 @@ public class QuestStepsSelectionMenu {
         ItemStack worldGuardEntryItem = new ItemBuilder(Material.WOODEN_AXE).setDisplayName("&e&lWorld Guard Action").build();
         ItemStack mythicMobInteractionItem = new ItemBuilder(Material.SKELETON_SKULL).setDisplayName("&e&lMythic Mob Interaction").build();
         ItemStack adminShopTradeItem = new ItemBuilder(Material.END_PORTAL_FRAME).setDisplayName("&e&lAdmin Shop Trade").build();
+        ItemStack blueprintPlaceItem = new ItemBuilder(Material.STONE).setCustomModelData(1).setDisplayName("&e&lBlueprint Placement").build();
         
         MenuItem blockInteractionMenuItem = new MenuItem(blockInteractionItem).addClickAction(click -> {
             Player player = click.getPlayer();
@@ -143,12 +145,29 @@ public class QuestStepsSelectionMenu {
             quest.getMenu().display(player);
         });
         
+        MenuItem blueprintPlaceMenuItem = new MenuItem(blueprintPlaceItem).addClickAction(click -> {
+            Player player = click.getPlayer();
+            player.closeInventory();
+            
+            MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "Click a block to set quest step location.");
+            plugin.getUserInputManager().getBlockInput(player, block -> {
+                plugin.getUserInputManager().getInput(player, new UserInputManager.StringInputPrompt("&bEnter a blueprint type region...",
+                        string -> true,
+                        string -> {
+                            quest.getSteps().add(index, new QuestStepBlueprintPlace(quest, block.getLocation(), string));
+                            quest.getMenu().createMenu();
+                            quest.getMenu().display(player);
+                        }, () -> quest.getMenu().display(player)));
+            });
+        });
+        
         menu.set(0, blockInteractionMenuItem);
         menu.set(1, entityInteractionMenuItem);
         menu.set(2, mythicMobKillMenuItem);
         menu.set(3, worldGuardEntryMenuItem);
         menu.set(4, mythicMobInteractionMenuItem);
         menu.set(5, adminShopMenuItem);
+        menu.set(6, blueprintPlaceMenuItem);
         menu.set(8, exitButton);
     }
 }

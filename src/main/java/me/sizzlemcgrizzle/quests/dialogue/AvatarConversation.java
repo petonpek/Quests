@@ -12,14 +12,11 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -51,16 +48,12 @@ public class AvatarConversation implements ConfigurationSerializable {
         this.messages = new ArrayList<>();
         this.onComplete = consumer;
         this.location = location;
-        
-        start();
     }
     
     public AvatarConversation(Map<String, Object> map) {
         this.id = map.get("id").toString();
         this.messages = (List<AvatarMessage>) map.get("messages");
         this.location = (Location) map.getOrDefault("location", null);
-        
-        start();
     }
     
     @NotNull
@@ -75,20 +68,6 @@ public class AvatarConversation implements ConfigurationSerializable {
             map.put("location", location);
         
         return map;
-    }
-    
-    private void start() {
-        new LambdaRunnable(() -> {
-            conversing.keySet().forEach(uuid -> {
-                Player player = Bukkit.getPlayer(uuid);
-                
-                if (player == null)
-                    return;
-                
-                if (location != null && player.getLocation().distanceSquared(location) <= 9)
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 5, 2));
-            });
-        }).runTaskTimer(QuestsPlugin.getInstance(), 0, 5);
     }
     
     public void setOnComplete(Consumer<Player> onComplete) {

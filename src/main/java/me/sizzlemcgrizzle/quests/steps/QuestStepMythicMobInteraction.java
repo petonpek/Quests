@@ -60,9 +60,10 @@ public class QuestStepMythicMobInteraction extends QuestStepItem {
         
         if (!active.getType().equals(mythicMob))
             return;
-
-//        if (getQuest().canStartQuest(event.getPlayer(), this))
-//            getQuest().start(event.getPlayer());
+        
+        if (getQuest().canStartQuest(event.getPlayer(), this))
+            getQuest().start(event.getPlayer());
+        
         
         if (isPlayerOnStep(player))
             if (takeItems(player)) {
@@ -84,8 +85,8 @@ public class QuestStepMythicMobInteraction extends QuestStepItem {
             QuestsPlugin.getInstance().getUserInputManager().getMythicMobInput(player, (mob, active) -> {
                 mythicMob = mob;
                 
-                createMenu(getQuest());
-                display(player, getQuest());
+                createMenu();
+                display(player);
             });
         }));
         
