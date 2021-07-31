@@ -14,6 +14,7 @@ import me.sizzlemcgrizzle.quests.util.UserInputManager;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.jetbrains.annotations.NotNull;
@@ -136,8 +137,12 @@ public class AssignedConversation extends AvatarConversation {
                 
                 for (int e = (i > 5 ? 5 : 0); e < (i > 5 ? 9 : 4); e++)
                     menu.set(i * 9 + e, new MenuItem(builder.build()).addClickAction(click -> {
-                        quest.start(click.getPlayer());
-                        player.closeInventory();
+                        if (quest.canStartQuest(player)) {
+                            quest.start(click.getPlayer());
+                            player.closeInventory();
+                        } else {
+                            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_FALL, 0.5F, 1F);
+                        }
                     }));
             }
         }

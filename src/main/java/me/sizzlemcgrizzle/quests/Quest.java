@@ -71,10 +71,7 @@ public class Quest implements ConfigurationSerializable {
             if (player == null)
                 return;
             
-            if (!ResourcePackManager.getInstance().isFullyAccepted(player))
-                return;
-            
-            String emoji = NavigationUtil.getUnicode(player, steps.get(p.getStepID()).getLocation());
+            String emoji = ResourcePackManager.getInstance().isFullyAccepted(player) ? NavigationUtil.getUnicode(player, steps.get(p.getStepID()).getLocation()) : "";
             
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(emoji + ChatColor.GOLD + " " + steps.get(p.getStepID()).getCompassDescription()));
         })).runTaskTimer(QuestsPlugin.getInstance(), 0, 3);
@@ -178,7 +175,7 @@ public class Quest implements ConfigurationSerializable {
         if (!isRepeatable() || completed.getOrDefault(player.getUniqueId(), 0L) + timeout * 1000L > System.currentTimeMillis())
             return false;
         
-        return player.hasPermission(permission);
+        return playerHasPermission(player);
     }
     
     public int getTimeout() {
