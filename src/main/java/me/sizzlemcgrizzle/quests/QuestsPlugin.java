@@ -109,10 +109,16 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
         userInputManager = new UserInputManager(this);
         
         Bukkit.getPluginManager().registerEvents(this, this);
+        
+        new LambdaRunnable(this::save).runTaskTimer(this, 36000, 36000);
     }
     
     @Override
     public void onDisable() {
+        save();
+    }
+    
+    private void save() {
         File questsFile = new File(getDataFolder(), "quests.yml");
         
         if (!questsFile.exists())
