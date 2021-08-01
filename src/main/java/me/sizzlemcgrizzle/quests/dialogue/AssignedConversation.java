@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AssignedConversation extends AvatarConversation {
@@ -88,8 +89,9 @@ public class AssignedConversation extends AvatarConversation {
             
             player.closeInventory();
             
-            QuestsPlugin.getInstance().getUserInputManager().getInput(player, new UserInputManager.ObjectInputPrompt<>("&bEnter a valid quest...",
-                    string -> QuestsPlugin.getInstance().getQuest(string),
+            QuestsPlugin.getInstance().getUserInputManager().getInput(player, new UserInputManager.ObjectInputPrompt<>("&bEnter a valid quest that is not already assigned...",
+                    string -> quests.stream().anyMatch(q -> q.getId().equalsIgnoreCase(string)) ? Optional.empty() :
+                            QuestsPlugin.getInstance().getQuest(string),
                     quest -> {
                         quests.add(quest);
                         
@@ -107,10 +109,10 @@ public class AssignedConversation extends AvatarConversation {
                     
                     player.closeInventory();
                     
-                    QuestsPlugin.getInstance().getUserInputManager().getInput(player, new UserInputManager.ObjectInputPrompt<>("&bEnter a valid quest...",
-                            string -> quests.stream().filter(q -> q.getId().equalsIgnoreCase(string)).findFirst(),
-                            quest -> {
-                                quests.remove(quest);
+                    QuestsPlugin.getInstance().getUserInputManager().getInput(player, new UserInputManager.StringInputPrompt("&bEnter a valid quest...",
+                            string -> quests.stream().anyMatch(q -> q.getId().equalsIgnoreCase(string)),
+                            s -> {
+                                quests.removeIf(q -> q.getId().equalsIgnoreCase(s));
                                 
                                 display(player);
                             }, () -> display(player)));
@@ -154,7 +156,7 @@ public class AssignedConversation extends AvatarConversation {
             }
             
             for (int i = 0; i < Math.min(availableQuests.size() - 5, 5); i++) {
-                Quest quest = availableQuests.get(i);
+                Quest quest = availableQuests.get(i + 5);
                 
                 ItemBuilder builder = new ItemBuilder(Material.BOOK)
                         .setCustomModelData(200)

@@ -73,6 +73,9 @@ public class Quest implements ConfigurationSerializable {
             if (player == null)
                 return;
             
+            if (steps.isEmpty())
+                return;
+            
             QuestStep step = steps.get(p.getStepID());
             
             String emoji = step.isShowingCompass() && ResourcePackManager.getInstance().isFullyAccepted(player) ? NavigationUtil.getUnicode(player, steps.get(p.getStepID()).getLocation()) : "";
@@ -208,6 +211,9 @@ public class Quest implements ConfigurationSerializable {
     
     
     public void start(Player player) {
+        if (steps.isEmpty())
+            return;
+        
         progress.put(player.getUniqueId(), new QuestProgress());
         QuestsPlugin.getInstance().getQuestMenu().getPlayerMenus().remove(player.getUniqueId());
     }
