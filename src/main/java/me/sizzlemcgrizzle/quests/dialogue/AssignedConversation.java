@@ -128,7 +128,7 @@ public class AssignedConversation extends AvatarConversation {
                         : "Quests", 6);
         
         if (!availableQuests.isEmpty()) {
-            for (int i = 0; i < Math.min(availableQuests.size(), 10); i++) {
+            for (int i = 0; i < Math.min(availableQuests.size(), 5); i++) {
                 Quest quest = availableQuests.get(i);
                 
                 ItemBuilder builder = new ItemBuilder(Material.BOOK)
@@ -142,7 +142,32 @@ public class AssignedConversation extends AvatarConversation {
                 builder.addLore("",
                         quest.canStartQuest(player) ? "&8→ &6Click to start quest" : "&cYou cannot start this quest right now.");
                 
-                for (int e = (i > 5 ? 5 : 0); e < (i > 5 ? 9 : 4); e++)
+                for (int e = 0; e < 4; e++)
+                    menu.set(i * 9 + e, new MenuItem(builder.build()).addClickAction(click -> {
+                        if (quest.canStartQuest(player)) {
+                            quest.start(click.getPlayer());
+                            player.closeInventory();
+                        } else {
+                            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5F, 1F);
+                        }
+                    }));
+            }
+            
+            for (int i = 0; i < Math.min(availableQuests.size() - 5, 5); i++) {
+                Quest quest = availableQuests.get(i);
+                
+                ItemBuilder builder = new ItemBuilder(Material.BOOK)
+                        .setCustomModelData(200)
+                        .setDisplayName(quest.getColor() + "" + ChatColor.BOLD + "" + quest.getId());
+                
+                if (quest.getDescription().size() > 0)
+                    builder.addLore("");
+                builder.addLore(quest.getDescription());
+                
+                builder.addLore("",
+                        quest.canStartQuest(player) ? "&8→ &6Click to start quest" : "&cYou cannot start this quest right now.");
+                
+                for (int e = 5; e < 9; e++)
                     menu.set(i * 9 + e, new MenuItem(builder.build()).addClickAction(click -> {
                         if (quest.canStartQuest(player)) {
                             quest.start(click.getPlayer());

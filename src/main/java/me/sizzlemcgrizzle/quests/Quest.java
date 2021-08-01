@@ -185,7 +185,10 @@ public class Quest implements ConfigurationSerializable {
         if (!isPublic())
             return false;
         
-        if (!isRepeatable() || completed.getOrDefault(player.getUniqueId(), 0L) + timeout * 1000L > System.currentTimeMillis())
+        if (!isRepeatable() && completed.containsKey(player.getUniqueId()))
+            return false;
+        
+        if (isRepeatable() && completed.getOrDefault(player.getUniqueId(), 0L) + timeout * 1000L > System.currentTimeMillis())
             return false;
         
         return playerHasPermission(player);

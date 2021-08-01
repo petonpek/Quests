@@ -202,6 +202,7 @@ public class AvatarConversation implements ConfigurationSerializable {
                                 s -> s.length() <= 150,
                                 s -> {
                                     m.format(s);
+                                    format();
                                     
                                     createMenu();
                                     display(player);

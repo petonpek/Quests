@@ -44,7 +44,7 @@ public class QuestStepBlueprintPlace extends QuestStepItem {
     @EventHandler
     public void onBlueprintPlace(BlueprintPostPasteEvent event) {
         
-        if (!event.getType().equals(type))
+        if (!event.getType().equalsIgnoreCase(type))
             return;
         
         if (isPlayerOnStep(event.getPlayer()))
