@@ -11,6 +11,7 @@ public class AvatarConversationCommandHandler extends SubCommandHandler {
         registerSubCommand("next", new AvatarConversationNextCommand(plugin));
         registerSubCommand("assign", new AvatarConversationAssignCommand(plugin));
         registerSubCommand("remove", new AvatarConversationRemoveCommand(plugin));
+        registerSubCommand("recommended", new AvatarRecommendedCommandHandler(plugin));
     }
     
     @Override

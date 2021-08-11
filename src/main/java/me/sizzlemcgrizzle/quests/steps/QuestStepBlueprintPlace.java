@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -63,8 +62,8 @@ public class QuestStepBlueprintPlace extends QuestStepItem {
     }
     
     @Override
-    protected List<MenuItem> getConfigurationButtons() {
-        return Collections.singletonList(new MenuItem(new ItemBuilder(Material.STONE).setCustomModelData(1).setDisplayName("&e&lChange Blueprint Type")
+    protected List<MenuItem> getConfigurationButtons(List<MenuItem> defaults) {
+        defaults.add(new MenuItem(new ItemBuilder(Material.STONE).setCustomModelData(1).setDisplayName("&e&lChange Blueprint Type")
                 .setLore("", "&7Blueprint type: &6" + type, "", "&8→ &6Click to set blueprint type").build())
                 .addClickAction(click -> {
                     Player player = click.getPlayer();
@@ -80,6 +79,8 @@ public class QuestStepBlueprintPlace extends QuestStepItem {
                                 display(player);
                             }, () -> display(player)));
                 }));
+        
+        return defaults;
     }
     
     @Override

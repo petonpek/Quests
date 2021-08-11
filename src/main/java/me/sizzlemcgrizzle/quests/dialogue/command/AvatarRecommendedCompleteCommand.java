@@ -1,21 +1,18 @@
-package me.sizzlemcgrizzle.quests.command;
+package me.sizzlemcgrizzle.quests.dialogue.command;
 
 import de.craftlancer.core.command.SubCommand;
 import de.craftlancer.core.util.MessageLevel;
 import de.craftlancer.core.util.MessageUtil;
-import me.sizzlemcgrizzle.quests.Quest;
 import me.sizzlemcgrizzle.quests.QuestsPlugin;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Optional;
-
-public class QuestsAbandonCommand extends SubCommand {
+public class AvatarRecommendedCompleteCommand extends SubCommand {
     
     private QuestsPlugin plugin;
     
-    public QuestsAbandonCommand(QuestsPlugin plugin) {
+    public AvatarRecommendedCompleteCommand(QuestsPlugin plugin) {
         super("", plugin, false);
         
         this.plugin = plugin;
@@ -28,16 +25,7 @@ public class QuestsAbandonCommand extends SubCommand {
             return null;
         }
         
-        Optional<Quest> optional = plugin.getQuests().stream().filter(q -> q.getProgress().containsKey(((Player) sender).getUniqueId())).findFirst();
-        
-        if (!optional.isPresent()) {
-            MessageUtil.sendMessage(plugin, sender, MessageLevel.INFO, "You are not currently in a quest.");
-            return null;
-        }
-        
-        optional.get().abandon(((Player) sender).getUniqueId(), true);
-        
-        MessageUtil.sendMessage(plugin, sender, MessageLevel.SUCCESS, "Quest abandoned.");
+        plugin.getRecommendedConversation().displayQuestMenu((Player) sender);
         return null;
     }
     

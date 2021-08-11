@@ -12,14 +12,12 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,26 +32,23 @@ public class AvatarConversation implements ConfigurationSerializable {
     private final String id;
     private final Map<UUID, Integer> conversing = new HashMap<>();
     private final List<UUID> onCooldown = new ArrayList<>();
-    private final Location location;
     private List<BaseComponent[]> formattedMessages;
     private Consumer<Player> onComplete;
     private PagedMenu menu;
     
-    public AvatarConversation(String id, @Nullable Location location) {
-        this(id, null, location);
+    public AvatarConversation(String id) {
+        this(id, null);
     }
     
-    public AvatarConversation(String id, Consumer<Player> consumer, @Nullable Location location) {
+    public AvatarConversation(String id, Consumer<Player> consumer) {
         this.id = id;
         this.messages = new ArrayList<>();
         this.onComplete = consumer;
-        this.location = location;
     }
     
     public AvatarConversation(Map<String, Object> map) {
         this.id = map.get("id").toString();
         this.messages = (List<AvatarMessage>) map.get("messages");
-        this.location = (Location) map.getOrDefault("location", null);
     }
     
     @NotNull
@@ -64,14 +59,7 @@ public class AvatarConversation implements ConfigurationSerializable {
         map.put("id", id);
         map.put("messages", messages);
         
-        if (location != null)
-            map.put("location", location);
-        
         return map;
-    }
-    
-    public void setOnComplete(Consumer<Player> onComplete) {
-        this.onComplete = onComplete;
     }
     
     public String getId() {
@@ -89,7 +77,7 @@ public class AvatarConversation implements ConfigurationSerializable {
         
         int i = conversing.getOrDefault(player.getUniqueId(), 0);
         
-        if (formattedMessages == null)
+        if (formattedMessages == null || formattedMessages.size() == 0)
             format();
         
         player.spigot().sendMessage(formattedMessages.get(i));
@@ -103,12 +91,25 @@ public class AvatarConversation implements ConfigurationSerializable {
         conversing.put(player.getUniqueId(), i + 1);
     }
     
-    private void complete(Player player) {
+    public Consumer<Player> getOnComplete() {
+        return onComplete;
+    }
+    
+    public void setOnComplete(Consumer<Player> onComplete) {
+        this.onComplete = onComplete;
+    }
+    
+    public void complete(Player player) {
         if (onComplete != null)
             onComplete.accept(player);
-        onCooldown.add(player.getUniqueId());
-        new LambdaRunnable(() -> onCooldown.remove(player.getUniqueId())).runTaskLater(QuestsPlugin.getInstance(), getCooldown());
-        conversing.remove(player.getUniqueId());
+        getOnCooldown().add(player.getUniqueId());
+        getConversing().remove(player.getUniqueId());
+        
+        new LambdaRunnable(() -> getOnCooldown().remove(player.getUniqueId())).runTaskLater(QuestsPlugin.getInstance(), getCooldown());
+    }
+    
+    public List<UUID> getOnCooldown() {
+        return onCooldown;
     }
     
     private void format() {
@@ -127,7 +128,7 @@ public class AvatarConversation implements ConfigurationSerializable {
                 if (i != m.getLastTextLine())
                     builder.append(lines.get(i)).append("\n");
                 else if (counter == messages.size() - 1)
-                    builder.append(lines.get(i)).append("\n");
+                    builder.append(lines.get(i)).append(" ").append(getLastMessageButton()).append("\n");
                 else {
                     BaseComponent c = new TextComponent("Next →");
                     
@@ -144,6 +145,14 @@ public class AvatarConversation implements ConfigurationSerializable {
             formattedMessages.add(builder.create());
             counter++;
         }
+    }
+    
+    /**
+     * Similar to the Next -> button, but shown on the very last
+     * conversation message. Could be used with GUIs.
+     */
+    public BaseComponent[] getLastMessageButton() {
+        return new BaseComponent[]{new TextComponent("")};
     }
     
     
@@ -187,6 +196,10 @@ public class AvatarConversation implements ConfigurationSerializable {
     
     protected int getCooldown() {
         return 0;
+    }
+    
+    public Map<UUID, Integer> getConversing() {
+        return conversing;
     }
     
     protected void createMenu() {

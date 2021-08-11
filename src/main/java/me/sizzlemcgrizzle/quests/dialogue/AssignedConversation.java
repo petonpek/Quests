@@ -12,7 +12,6 @@ import me.sizzlemcgrizzle.quests.Quest;
 import me.sizzlemcgrizzle.quests.QuestsPlugin;
 import me.sizzlemcgrizzle.quests.util.UserInputManager;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -29,8 +28,8 @@ public class AssignedConversation extends AvatarConversation {
     
     private List<Quest> quests;
     
-    public AssignedConversation(String id, Location location) {
-        super(id, location);
+    public AssignedConversation(String id) {
+        super(id);
         
         setOnComplete(player -> new LambdaRunnable(() -> {
             if (!quests.isEmpty())

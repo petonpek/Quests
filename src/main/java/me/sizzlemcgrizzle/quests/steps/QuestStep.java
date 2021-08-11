@@ -21,6 +21,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,15 +46,7 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
         this(quest, location, 1);
     }
     
-    public QuestStep(Quest quest, Location location, Location conversationLocation) {
-        this(quest, location, conversationLocation, 1);
-    }
-    
     public QuestStep(Quest quest, Location location, int weight) {
-        this(quest, location, null, weight);
-    }
-    
-    public QuestStep(Quest quest, Location location, Location conversationLocation, int weight) {
         this.questName = quest.getId();
         this.location = location;
         this.totalWeight = weight;
@@ -61,7 +54,7 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
         this.conversation = new AvatarConversation(UUID.randomUUID().toString(), player -> {
             getQuest().completeStep(player);
             reward.reward(player);
-        }, conversationLocation);
+        });
         
         Bukkit.getPluginManager().registerEvents(this, QuestsPlugin.getInstance());
     }
@@ -154,7 +147,7 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
     
     protected abstract Material getMenuMaterial();
     
-    protected abstract List<MenuItem> getConfigurationButtons();
+    protected abstract List<MenuItem> getConfigurationButtons(List<MenuItem> defaults);
     
     public ItemStack getMenuItem() {
         ItemBuilder builder = new ItemBuilder(getMenuMaterial());
@@ -175,13 +168,10 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
     }
     
     public void createMenu() {
-        List<MenuItem> buttons = getConfigurationButtons();
         
-        int rows = ((buttons.size() + 6) / 10) + 1;
+        List<MenuItem> buttons = new ArrayList<>();
         
-        this.configurationMenu = new Menu(QuestsPlugin.getInstance(), "Step Configuration", rows);
-        
-        MenuItem locationButton = new MenuItem(new ItemBuilder(Material.STONE_BRICKS).setDisplayName("&e&lChange Location")
+        buttons.add(new MenuItem(new ItemBuilder(Material.STONE_BRICKS).setDisplayName("&e&lChange Location")
                 .setLore("", "&7Location: &6(" + ((int) getLocation().getX()) + ", " + ((int) getLocation().getY()) + ", " + ((int) getLocation().getZ()) + ")",
                         "", "&8→ &6Click to set location").build()).addClickAction(click -> {
             Player player = click.getPlayer();
@@ -196,9 +186,9 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
                         createMenu();
                         display(player);
                     });
-        });
+        }));
         
-        MenuItem weightButton = new MenuItem(new ItemBuilder(Material.IRON_BLOCK).setDisplayName("&e&lSet Total Weight")
+        buttons.add(new MenuItem(new ItemBuilder(Material.IRON_BLOCK).setDisplayName("&e&lSet Total Weight")
                 .setLore("", "&7Total weight: &6" + totalWeight, "", "&8→ &6Click to set total weight").build()).addClickAction(click -> {
             Player player = click.getPlayer();
             player.closeInventory();
@@ -210,15 +200,15 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
                         createMenu();
                         display(player);
                     }, () -> display(player)));
-        });
+        }));
         
-        MenuItem rewardButton = new MenuItem(new ItemBuilder(Material.EMERALD).setDisplayName("&e&lEdit Reward")
+        buttons.add(new MenuItem(new ItemBuilder(Material.EMERALD).setDisplayName("&e&lEdit Reward")
                 .setLore("", "&8→ &6Click to edit reward").build()).addClickAction(click -> {
             Player player = click.getPlayer();
             reward.display(player, this);
-        });
+        }));
         
-        MenuItem compassButton = new MenuItem(new ItemBuilder(Material.COMPASS).setDisplayName("&e&lSet Direction Description")
+        buttons.add(new MenuItem(new ItemBuilder(Material.COMPASS).setDisplayName("&e&lSet Direction Description")
                 .setLore("",
                         "&7Showing compass: " + (showCompass ? "&ayes" : "&cno"),
                         "&7Current information: &6" + compassDescription, "",
@@ -241,34 +231,30 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
                     
                     createMenu();
                     display(click.getPlayer());
-                });
+                }));
         
-        MenuItem conversationButton = new MenuItem(new ItemBuilder(Material.SPRUCE_SIGN).setDisplayName("&e&lEdit Conversation")
+        buttons.add(new MenuItem(new ItemBuilder(Material.SPRUCE_SIGN).setDisplayName("&e&lEdit Conversation")
                 .setLore("", "&8→ &6Click to edit conversation").build()).addClickAction(click -> {
             Player player = click.getPlayer();
             conversation.display(player);
-        });
+        }));
         
-        configurationMenu.set(0, locationButton);
-        configurationMenu.set(1, weightButton);
-        configurationMenu.set(2, rewardButton);
-        configurationMenu.set(3, compassButton);
-        configurationMenu.set(4, conversationButton);
+        buttons = getConfigurationButtons(buttons);
         
-        int slot = 5;
-        for (MenuItem item : buttons) {
-            configurationMenu.set(slot, item);
-            slot++;
+        int rows = buttons.size() / 9 + 1;
+        
+        this.configurationMenu = new Menu(QuestsPlugin.getInstance(), "Step Configuration", rows);
+        
+        for (int i = 0; i < buttons.size(); i++) {
+            configurationMenu.set(i, buttons.get(i));
         }
-        
-        int exitSlot = (rows * 9) - 1;
         
         MenuItem exitButton = new MenuItem(new ItemBuilder(Material.BARRIER).setDisplayName("&e&lGo back")
                 .setLore("", "&8→ &6Click to return to quest step menu").build()).addClickAction(click -> {
             Player player = click.getPlayer();
             getQuest().getMenu().display(player);
         });
-        configurationMenu.set(exitSlot, exitButton);
+        configurationMenu.set(buttons.size(), exitButton);
     }
     
     public AvatarConversation getConversation() {

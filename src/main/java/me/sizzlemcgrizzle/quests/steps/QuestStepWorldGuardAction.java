@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -89,30 +88,32 @@ public class QuestStepWorldGuardAction extends QuestStep {
     }
     
     @Override
-    protected List<MenuItem> getConfigurationButtons() {
-        return Arrays.asList(new MenuItem(new ItemBuilder(Material.WOODEN_AXE).setDisplayName("&e&lChange World Guard Region")
-                        .setLore("", "&7Region name: &6" + regionName, "", "&8→ &6Click to set region").build()).addClickAction(click -> {
-                    Player player = click.getPlayer();
-                    
-                    player.closeInventory();
-                    
-                    QuestsPlugin.getInstance().getUserInputManager().getInput(player, new UserInputManager.StringInputPrompt("&bEnter a valid world guard region...",
-                            string -> WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).hasRegion(string),
-                            string -> {
-                                regionName = string;
-                                
-                                createMenu();
-                                display(player);
-                            }, () -> display(player)));
-                }),
-                new MenuItem(new ItemBuilder(Material.OAK_DOOR).setDisplayName("&e&lToggle Action")
-                        .setLore("", "&7Action: &6" + (entry ? "entry" : "exit"), "", "&8→ &6Click to toggle action").build()).addClickAction(click -> {
-                    Player player = click.getPlayer();
-                    
-                    entry = !entry;
-                    createMenu();
-                    display(player);
-                }));
+    protected List<MenuItem> getConfigurationButtons(List<MenuItem> defaults) {
+        defaults.add(new MenuItem(new ItemBuilder(Material.WOODEN_AXE).setDisplayName("&e&lChange World Guard Region")
+                .setLore("", "&7Region name: &6" + regionName, "", "&8→ &6Click to set region").build()).addClickAction(click -> {
+            Player player = click.getPlayer();
+            
+            player.closeInventory();
+            
+            QuestsPlugin.getInstance().getUserInputManager().getInput(player, new UserInputManager.StringInputPrompt("&bEnter a valid world guard region...",
+                    string -> WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld())).hasRegion(string),
+                    string -> {
+                        regionName = string;
+                        
+                        createMenu();
+                        display(player);
+                    }, () -> display(player)));
+        }));
+        defaults.add(new MenuItem(new ItemBuilder(Material.OAK_DOOR).setDisplayName("&e&lToggle Action")
+                .setLore("", "&7Action: &6" + (entry ? "entry" : "exit"), "", "&8→ &6Click to toggle action").build()).addClickAction(click -> {
+            Player player = click.getPlayer();
+            
+            entry = !entry;
+            createMenu();
+            display(player);
+        }));
+        
+        return defaults;
     }
     
     @Override

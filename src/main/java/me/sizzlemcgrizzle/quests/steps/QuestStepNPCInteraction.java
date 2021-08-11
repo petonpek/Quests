@@ -10,7 +10,6 @@ import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemStack;
@@ -23,9 +22,7 @@ public class QuestStepNPCInteraction extends QuestStepItem {
     private int id;
     
     public QuestStepNPCInteraction(Quest quest, Location location, NPC npc) {
-        super(quest, location,
-                npc.getEntity() instanceof LivingEntity ? ((LivingEntity) npc.getEntity()).getEyeLocation() : npc.getEntity().getLocation(),
-                new ItemStack(Material.AIR));
+        super(quest, location, new ItemStack(Material.AIR));
         
         this.id = npc.getId();
     }
@@ -62,10 +59,8 @@ public class QuestStepNPCInteraction extends QuestStepItem {
     }
     
     @Override
-    protected List<MenuItem> getConfigurationButtons() {
-        List<MenuItem> list = super.getConfigurationButtons();
-        
-        list.add(new MenuItem(new ItemBuilder(Material.PLAYER_HEAD).setDisplayName("&e&lChange NPC")
+    protected List<MenuItem> getConfigurationButtons(List<MenuItem> defaults) {
+        defaults.add(new MenuItem(new ItemBuilder(Material.PLAYER_HEAD).setDisplayName("&e&lChange NPC")
                 .setLore("", "&8→ &6Click to set NPC").build()).addClickAction(click -> {
             Player player = click.getPlayer();
             
@@ -80,7 +75,7 @@ public class QuestStepNPCInteraction extends QuestStepItem {
             });
         }));
         
-        return list;
+        return defaults;
     }
     
     @Override

@@ -1,5 +1,7 @@
 package me.sizzlemcgrizzle.quests.util;
 
+import de.craftlancer.clfeatures.CLFeatures;
+import de.craftlancer.clfeatures.portal.PortalFeatureInstance;
 import io.lumine.xikage.mythicmobs.MythicMobs;
 import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
 import io.lumine.xikage.mythicmobs.mobs.MythicMob;
@@ -35,6 +37,7 @@ public class UserInputManager implements Listener {
     private final QuestsPlugin plugin;
     private final Map<UUID, Consumer<NPC>> inputMapNPC = new HashMap<>();
     private final Map<UUID, Consumer<Block>> inputMapBlock = new HashMap<>();
+    private final Map<UUID, Consumer<PortalFeatureInstance>> inputMapPortal = new HashMap<>();
     private final Map<UUID, BiConsumer<MythicMob, ActiveMob>> inputMapMythicMob = new HashMap<>();
     
     public UserInputManager(QuestsPlugin plugin) {
@@ -55,6 +58,14 @@ public class UserInputManager implements Listener {
     public void onBlockInteract(PlayerInteractEvent event) {
         if (!event.hasBlock())
             return;
+        
+        if (inputMapPortal.containsKey(event.getPlayer().getUniqueId())) {
+            CLFeatures.getInstance().getFeature("portal").getFeatures().stream()
+                    .filter(f -> f.getStructure().containsBlock(event.getClickedBlock()))
+                    .findFirst()
+                    .ifPresent(portalFeatureInstance -> inputMapPortal.remove(event.getPlayer().getUniqueId())
+                            .accept((PortalFeatureInstance) portalFeatureInstance));
+        }
         
         Optional.ofNullable(inputMapBlock.remove(event.getPlayer().getUniqueId())).ifPresent(c -> {
             c.accept(event.getClickedBlock());
@@ -86,6 +97,10 @@ public class UserInputManager implements Listener {
     
     public void getBlockInput(Player player, Consumer<Block> consumer) {
         inputMapBlock.put(player.getUniqueId(), consumer);
+    }
+    
+    public void getPortalInput(Player player, Consumer<PortalFeatureInstance> consumer) {
+        inputMapPortal.put(player.getUniqueId(), consumer);
     }
     
     public void getMythicMobInput(Player player, BiConsumer<MythicMob, ActiveMob> consumer) {

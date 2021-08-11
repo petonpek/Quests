@@ -84,6 +84,16 @@ public class Quest implements ConfigurationSerializable {
         })).runTaskTimer(QuestsPlugin.getInstance(), 0, 3);
     }
     
+    public void abandon(UUID uuid, boolean withTimeout) {
+        
+        steps.get(progress.get(uuid).getStepID()).getConversation().getConversing().remove(uuid);
+        
+        progress.remove(uuid);
+        
+        if (withTimeout)
+            completed.put(uuid, System.currentTimeMillis());
+    }
+    
     @NotNull
     @Override
     public Map<String, Object> serialize() {

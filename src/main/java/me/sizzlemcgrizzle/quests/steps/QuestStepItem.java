@@ -10,7 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,19 +18,7 @@ public abstract class QuestStepItem extends QuestStep {
     private ItemStack item;
     
     public QuestStepItem(Quest quest, Location location, ItemStack item) {
-        super(quest, location);
-        
-        this.item = item;
-    }
-    
-    public QuestStepItem(Quest quest, Location location, Location conversationLocation, ItemStack item) {
-        super(quest, location, conversationLocation);
-        
-        this.item = item;
-    }
-    
-    public QuestStepItem(Quest quest, Location location, Location conversationLocation, int weight, ItemStack item) {
-        super(quest, location, conversationLocation, weight);
+        this(quest, location, 1, item);
         
         this.item = item;
     }
@@ -85,10 +72,8 @@ public abstract class QuestStepItem extends QuestStep {
     }
     
     @Override
-    protected List<MenuItem> getConfigurationButtons() {
-        List<MenuItem> list = new ArrayList<>();
-        
-        list.add(new MenuItem(new ItemBuilder(Material.CHEST).setDisplayName("&e&lSet Item")
+    protected List<MenuItem> getConfigurationButtons(List<MenuItem> defaults) {
+        defaults.add(new MenuItem(new ItemBuilder(Material.CHEST).setDisplayName("&e&lSet Item")
                 .setLore("", "&7Current item: &6" + ((item == null || item.getType().isAir() ? "none" :
                                 "x" + item.getAmount() + " " + (item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName() : item.getType().name()))),
                         "", "&8→ &6Click to set item in hand").build()).addClickAction(click -> {
@@ -100,6 +85,6 @@ public abstract class QuestStepItem extends QuestStep {
             display(player);
         }));
         
-        return list;
+        return defaults;
     }
 }

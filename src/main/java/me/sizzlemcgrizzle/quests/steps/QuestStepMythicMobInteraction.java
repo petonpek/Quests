@@ -11,7 +11,6 @@ import me.sizzlemcgrizzle.quests.Quest;
 import me.sizzlemcgrizzle.quests.QuestsPlugin;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -25,11 +24,7 @@ public class QuestStepMythicMobInteraction extends QuestStepItem {
     private MythicMob mythicMob;
     
     public QuestStepMythicMobInteraction(Quest quest, Location location, ActiveMob active) {
-        super(quest, location,
-                active.getEntity().getBukkitEntity() instanceof LivingEntity ?
-                        ((LivingEntity) active.getEntity().getBukkitEntity()).getEyeLocation()
-                        : active.getEntity().getBukkitEntity().getLocation(),
-                new ItemStack(Material.AIR));
+        super(quest, location, new ItemStack(Material.AIR));
         
         this.mythicMob = active.getType();
     }
@@ -73,10 +68,8 @@ public class QuestStepMythicMobInteraction extends QuestStepItem {
     }
     
     @Override
-    protected List<MenuItem> getConfigurationButtons() {
-        List<MenuItem> list = super.getConfigurationButtons();
-        
-        list.add(new MenuItem(new ItemBuilder(Material.SKELETON_SKULL).setDisplayName("&e&lChange Mythic Mob")
+    protected List<MenuItem> getConfigurationButtons(List<MenuItem> defaults) {
+        defaults.add(new MenuItem(new ItemBuilder(Material.SKELETON_SKULL).setDisplayName("&e&lChange Mythic Mob")
                 .setLore("", "&7Mythic mob name: &6" + mythicMob.getInternalName(), "", "&8→ &6Click to set mythic mob").build()).addClickAction(click -> {
             Player player = click.getPlayer();
             player.closeInventory();
@@ -90,7 +83,7 @@ public class QuestStepMythicMobInteraction extends QuestStepItem {
             });
         }));
         
-        return list;
+        return defaults;
     }
     
     @Override

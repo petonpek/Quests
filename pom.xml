@@ -59,6 +59,12 @@
         </dependency>
 
         <dependency>
+            <groupId>de.craftlancer</groupId>
+            <artifactId>clfeatures</artifactId>
+            <version>0.3.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.lumine.xikage</groupId>
             <artifactId>MythicMobs</artifactId>
             <version>4.9.1</version>

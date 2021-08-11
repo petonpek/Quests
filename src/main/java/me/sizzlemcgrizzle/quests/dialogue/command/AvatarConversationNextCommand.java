@@ -46,6 +46,11 @@ public class AvatarConversationNextCommand extends SubCommand {
         
         Player player = (Player) sender;
         
+        if (id.equals("recommended")) {
+            plugin.getRecommendedConversation().next(player);
+            return null;
+        }
+        
         plugin.getQuests().stream().filter(quest -> quest.getProgress().containsKey(player.getUniqueId()))
                 .findFirst().ifPresent(quest -> {
             AvatarConversation conversation = quest.getSteps().get(quest.getProgress().get(player.getUniqueId()).getStepID()).getConversation();

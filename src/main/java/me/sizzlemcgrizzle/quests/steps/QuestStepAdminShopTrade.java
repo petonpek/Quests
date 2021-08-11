@@ -13,7 +13,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -68,8 +67,8 @@ public class QuestStepAdminShopTrade extends QuestStep {
     }
     
     @Override
-    protected List<MenuItem> getConfigurationButtons() {
-        return Collections.singletonList(new MenuItem(new ItemBuilder(Material.END_PORTAL_FRAME).setDisplayName("&e&lAdjust rows")
+    protected List<MenuItem> getConfigurationButtons(List<MenuItem> defaults) {
+        defaults.add(new MenuItem(new ItemBuilder(Material.END_PORTAL_FRAME).setDisplayName("&e&lAdjust rows")
                 .setLore("", "&8→ &6Click to set rows").build())
                 .addClickAction(click -> {
                     Player player = click.getPlayer();
@@ -93,6 +92,7 @@ public class QuestStepAdminShopTrade extends QuestStep {
                                 display(player);
                             }));
                 }));
+        return defaults;
     }
     
     @Override

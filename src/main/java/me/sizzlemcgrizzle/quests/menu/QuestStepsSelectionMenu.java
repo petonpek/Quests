@@ -15,6 +15,7 @@ import me.sizzlemcgrizzle.quests.steps.QuestStepBlueprintPlace;
 import me.sizzlemcgrizzle.quests.steps.QuestStepMythicMobInteraction;
 import me.sizzlemcgrizzle.quests.steps.QuestStepMythicMobKill;
 import me.sizzlemcgrizzle.quests.steps.QuestStepNPCInteraction;
+import me.sizzlemcgrizzle.quests.steps.QuestStepPortalUse;
 import me.sizzlemcgrizzle.quests.steps.QuestStepWorldGuardAction;
 import me.sizzlemcgrizzle.quests.util.UserInputManager;
 import org.bukkit.Material;
@@ -48,6 +49,7 @@ public class QuestStepsSelectionMenu {
         ItemStack mythicMobInteractionItem = new ItemBuilder(Material.SKELETON_SKULL).setDisplayName("&e&lMythic Mob Interaction").build();
         ItemStack adminShopTradeItem = new ItemBuilder(Material.END_PORTAL_FRAME).setDisplayName("&e&lAdmin Shop Trade").build();
         ItemStack blueprintPlaceItem = new ItemBuilder(Material.STONE).setCustomModelData(1).setDisplayName("&e&lBlueprint Placement").build();
+        ItemStack portalUseItem = new ItemBuilder(Material.CHISELED_QUARTZ_BLOCK).setCustomModelData(1).setDisplayName("&e&lPortal Use").build();
         
         MenuItem blockInteractionMenuItem = new MenuItem(blockInteractionItem).addClickAction(click -> {
             Player player = click.getPlayer();
@@ -161,6 +163,20 @@ public class QuestStepsSelectionMenu {
             });
         });
         
+        MenuItem portalUseMenuItem = new MenuItem(portalUseItem).addClickAction(click -> {
+            Player player = click.getPlayer();
+            player.closeInventory();
+            
+            MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "Click a portal to set quest step location.");
+            plugin.getUserInputManager()
+                    .getPortalInput(player, portal -> {
+                        
+                        quest.getSteps().add(index, new QuestStepPortalUse(quest, portal.getInitialBlock()));
+                        quest.getMenu().createMenu();
+                        quest.getMenu().display(player);
+                    });
+        });
+        
         menu.set(0, blockInteractionMenuItem);
         menu.set(1, entityInteractionMenuItem);
         menu.set(2, mythicMobKillMenuItem);
@@ -168,6 +184,7 @@ public class QuestStepsSelectionMenu {
         menu.set(4, mythicMobInteractionMenuItem);
         menu.set(5, adminShopMenuItem);
         menu.set(6, blueprintPlaceMenuItem);
+        menu.set(7, portalUseMenuItem);
         menu.set(8, exitButton);
     }
 }

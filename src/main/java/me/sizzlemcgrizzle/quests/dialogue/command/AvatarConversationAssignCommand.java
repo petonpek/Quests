@@ -8,8 +8,6 @@ import me.sizzlemcgrizzle.quests.QuestsPlugin;
 import me.sizzlemcgrizzle.quests.dialogue.AssignedConversation;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
@@ -64,8 +62,7 @@ public class AvatarConversationAssignCommand extends SubCommand {
         if (args[2].equalsIgnoreCase("citizens")) {
             MessageUtil.sendMessage(plugin, sender, MessageLevel.INFO, "Right click an NPC.");
             plugin.getUserInputManager().getNPCInput(player, npc -> {
-                AssignedConversation convo = new AssignedConversation(args[3],
-                        (npc.getEntity() instanceof LivingEntity) ? ((LivingEntity) npc.getEntity()).getEyeLocation() : npc.getEntity().getLocation());
+                AssignedConversation convo = new AssignedConversation(args[3]);
                 plugin.getNPCConversations().put(npc.getId(), convo);
                 convo.display(player);
             });
@@ -74,9 +71,7 @@ public class AvatarConversationAssignCommand extends SubCommand {
         if (args[2].equalsIgnoreCase("mythicmobs")) {
             MessageUtil.sendMessage(plugin, sender, MessageLevel.INFO, "Right click a mythic mob.");
             plugin.getUserInputManager().getMythicMobInput(player, (mm, active) -> {
-                Entity bukkitEntity = active.getEntity().getBukkitEntity();
-                AssignedConversation convo = new AssignedConversation(args[3],
-                        bukkitEntity instanceof LivingEntity ? ((LivingEntity) bukkitEntity).getEyeLocation() : bukkitEntity.getLocation());
+                AssignedConversation convo = new AssignedConversation(args[3]);
                 plugin.getMythicMobConversations().put(mm, convo);
                 convo.display(player);
             });

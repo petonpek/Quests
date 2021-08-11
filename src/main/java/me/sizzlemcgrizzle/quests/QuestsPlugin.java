@@ -10,6 +10,7 @@ import me.sizzlemcgrizzle.quests.dialogue.AssignedConversation;
 import me.sizzlemcgrizzle.quests.dialogue.Avatar;
 import me.sizzlemcgrizzle.quests.dialogue.AvatarConversation;
 import me.sizzlemcgrizzle.quests.dialogue.AvatarMessage;
+import me.sizzlemcgrizzle.quests.dialogue.RecommendedConversation;
 import me.sizzlemcgrizzle.quests.dialogue.command.AvatarCommandHandler;
 import me.sizzlemcgrizzle.quests.menu.QuestsOverviewMenu;
 import me.sizzlemcgrizzle.quests.steps.QuestStep;
@@ -19,6 +20,7 @@ import me.sizzlemcgrizzle.quests.steps.QuestStepBlueprintPlace;
 import me.sizzlemcgrizzle.quests.steps.QuestStepMythicMobInteraction;
 import me.sizzlemcgrizzle.quests.steps.QuestStepMythicMobKill;
 import me.sizzlemcgrizzle.quests.steps.QuestStepNPCInteraction;
+import me.sizzlemcgrizzle.quests.steps.QuestStepPortalUse;
 import me.sizzlemcgrizzle.quests.steps.QuestStepWorldGuardAction;
 import me.sizzlemcgrizzle.quests.util.UserInputManager;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
@@ -31,6 +33,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -54,6 +58,7 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
     
     private QuestsOverviewMenu questMenu;
     private UserInputManager userInputManager;
+    private RecommendedConversation recommendedConversation;
     
     public static QuestsPlugin getInstance() {
         return instance;
@@ -74,10 +79,12 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
         ConfigurationSerialization.registerClass(QuestStepMythicMobInteraction.class);
         ConfigurationSerialization.registerClass(QuestStepAdminShopTrade.class);
         ConfigurationSerialization.registerClass(QuestStepBlueprintPlace.class);
+        ConfigurationSerialization.registerClass(QuestStepPortalUse.class);
         ConfigurationSerialization.registerClass(Avatar.class);
         ConfigurationSerialization.registerClass(AvatarMessage.class);
         ConfigurationSerialization.registerClass(AvatarConversation.class);
         ConfigurationSerialization.registerClass(AssignedConversation.class);
+        ConfigurationSerialization.registerClass(RecommendedConversation.class);
         
         MessageUtil.register(this, new TextComponent("§8[§cQuests§8]"));
         
@@ -93,6 +100,7 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
         
         avatars = (List<Avatar>) config.get("avatars", new ArrayList<>());
         quests = (List<Quest>) config.get("quests", new ArrayList<>());
+        recommendedConversation = (RecommendedConversation) config.get("recommendedConversation", new RecommendedConversation("recommended"));
         
         if (config.getConfigurationSection("mythicMobConversations") != null)
             mythicMobConversations = config.getConfigurationSection("mythicMobConversations").getValues(false).entrySet().stream()
@@ -128,6 +136,7 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
         
         config.set("quests", quests);
         config.set("avatars", avatars);
+        config.set("recommendedConversation", recommendedConversation);
         
         config.set("mythicMobConversations", mythicMobConversations.entrySet().stream().collect(Collectors.toMap(e -> e.getKey().getInternalName(), Map.Entry::getValue)));
         config.set("npcConversations", npcConversations.entrySet().stream().collect(Collectors.toMap(e -> String.valueOf(e.getKey()), Map.Entry::getValue)));
@@ -148,6 +157,10 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
     
     public UserInputManager getUserInputManager() {
         return userInputManager;
+    }
+    
+    public RecommendedConversation getRecommendedConversation() {
+        return recommendedConversation;
     }
     
     public QuestsOverviewMenu getQuestMenu() {
@@ -211,5 +224,15 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
             convo.display(player);
         else
             convo.next(player);
+    }
+    
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        new LambdaRunnable(() -> recommendedConversation.next(event.getPlayer())).runTaskLater(this, 20);
+    }
+    
+    @EventHandler
+    public void onPlayerLeave(PlayerQuitEvent event) {
+        recommendedConversation.getConversing().remove(event.getPlayer().getUniqueId());
     }
 }
