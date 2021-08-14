@@ -68,7 +68,10 @@ public class QuestStepMythicMobInteraction extends QuestStepItem {
     }
     
     @Override
-    protected List<MenuItem> getConfigurationButtons(List<MenuItem> defaults) {
+    protected List<MenuItem> getConfigurationButtons() {
+        List<MenuItem> defaults = super.getConfigurationButtons();
+        
+        
         defaults.add(new MenuItem(new ItemBuilder(Material.SKELETON_SKULL).setDisplayName("&e&lChange Mythic Mob")
                 .setLore("", "&7Mythic mob name: &6" + mythicMob.getInternalName(), "", "&8→ &6Click to set mythic mob").build()).addClickAction(click -> {
             Player player = click.getPlayer();

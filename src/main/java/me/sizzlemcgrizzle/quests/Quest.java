@@ -33,10 +33,12 @@ public class Quest implements ConfigurationSerializable {
     private boolean isRepeatable = false;
     private int timeout = 0;
     private boolean startAutomatically = false;
+    // true if quest is made by content team, false if made by admins
+    private boolean contentTeam;
     
     private QuestStepsMenu menu;
     
-    public Quest(String id, ChatColor color, String permission) {
+    public Quest(String id, boolean contentTeam, ChatColor color, String permission) {
         this.id = id;
         this.permission = permission;
         this.steps = new ArrayList<>();
@@ -44,6 +46,7 @@ public class Quest implements ConfigurationSerializable {
         this.completed = new HashMap<>();
         this.description = new ArrayList<>();
         this.color = color;
+        this.contentTeam = contentTeam;
         
         start();
     }
@@ -62,6 +65,7 @@ public class Quest implements ConfigurationSerializable {
         this.description = (List<String>) map.get("description");
         this.timeout = (int) map.getOrDefault("timeout", 0);
         this.startAutomatically = (boolean) map.getOrDefault("startAutomatically", false);
+        this.contentTeam = (boolean) map.getOrDefault("contentTeam", false);
         
         start();
     }
@@ -110,12 +114,17 @@ public class Quest implements ConfigurationSerializable {
         map.put("description", description);
         map.put("timeout", timeout);
         map.put("startAutomatically", startAutomatically);
+        map.put("contentTeam", contentTeam);
         
         return map;
     }
     
     public String getId() {
         return id;
+    }
+    
+    public boolean isByContentTeam() {
+        return contentTeam;
     }
     
     public ChatColor getColor() {

@@ -19,7 +19,7 @@ public class AvatarConversationAssignCommand extends SubCommand {
     private QuestsPlugin plugin;
     
     public AvatarConversationAssignCommand(QuestsPlugin plugin) {
-        super("quests.admin", plugin, false);
+        super(QuestsPlugin.CREATOR_PERMISSION, plugin, false);
         
         this.plugin = plugin;
     }
@@ -63,7 +63,11 @@ public class AvatarConversationAssignCommand extends SubCommand {
             MessageUtil.sendMessage(plugin, sender, MessageLevel.INFO, "Right click an NPC.");
             plugin.getUserInputManager().getNPCInput(player, npc -> {
                 AssignedConversation convo = new AssignedConversation(args[3]);
-                plugin.getNPCConversations().put(npc.getId(), convo);
+                
+                if (plugin.getNPCConversations().containsKey(npc.getId()))
+                    MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "A conversation is already assigned to this NPC.");
+                else
+                    plugin.getNPCConversations().put(npc.getId(), convo);
                 convo.display(player);
             });
         }
@@ -72,7 +76,10 @@ public class AvatarConversationAssignCommand extends SubCommand {
             MessageUtil.sendMessage(plugin, sender, MessageLevel.INFO, "Right click a mythic mob.");
             plugin.getUserInputManager().getMythicMobInput(player, (mm, active) -> {
                 AssignedConversation convo = new AssignedConversation(args[3]);
-                plugin.getMythicMobConversations().put(mm, convo);
+                if (plugin.getMythicMobConversations().containsKey(mm))
+                    MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "A conversation is already assigned to this Mythic Mob.");
+                else
+                    plugin.getMythicMobConversations().put(mm, convo);
                 convo.display(player);
             });
         }

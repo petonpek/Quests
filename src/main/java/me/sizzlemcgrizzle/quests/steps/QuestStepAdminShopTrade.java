@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class QuestStepAdminShopTrade extends QuestStep {
     
@@ -67,9 +68,13 @@ public class QuestStepAdminShopTrade extends QuestStep {
     }
     
     @Override
-    protected List<MenuItem> getConfigurationButtons(List<MenuItem> defaults) {
+    protected List<MenuItem> getConfigurationButtons() {
+        List<MenuItem> defaults = super.getConfigurationButtons();
+        
         defaults.add(new MenuItem(new ItemBuilder(Material.END_PORTAL_FRAME).setDisplayName("&e&lAdjust rows")
-                .setLore("", "&8→ &6Click to set rows").build())
+                .addLore("", "&7Current rows:")
+                .addLore(rows.stream().map(i -> "&7 - " + i).collect(Collectors.toList()))
+                .addLore("", "&8→ &6Click to set rows").build())
                 .addClickAction(click -> {
                     Player player = click.getPlayer();
                     

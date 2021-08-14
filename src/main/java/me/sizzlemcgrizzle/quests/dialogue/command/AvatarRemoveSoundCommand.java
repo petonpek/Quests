@@ -19,7 +19,7 @@ public class AvatarRemoveSoundCommand extends SubCommand {
     private QuestsPlugin plugin;
     
     public AvatarRemoveSoundCommand(QuestsPlugin plugin) {
-        super("quests.admin", plugin, false);
+        super(QuestsPlugin.ADMIN_PERMISSION, plugin, false);
         
         this.plugin = plugin;
     }

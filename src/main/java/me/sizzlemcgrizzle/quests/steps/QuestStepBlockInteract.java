@@ -1,5 +1,6 @@
 package me.sizzlemcgrizzle.quests.steps;
 
+import de.craftlancer.core.menu.MenuItem;
 import de.craftlancer.core.util.ItemBuilder;
 import me.sizzlemcgrizzle.quests.Quest;
 import org.bukkit.Location;
@@ -9,6 +10,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
 import java.util.Map;
 
 public class QuestStepBlockInteract extends QuestStepItem {
@@ -46,5 +48,10 @@ public class QuestStepBlockInteract extends QuestStepItem {
     @Override
     public ItemStack getMenuItem() {
         return new ItemBuilder(super.getMenuItem()).setDisplayName("&e&lBlock Interaction").build();
+    }
+    
+    @Override
+    protected List<MenuItem> getConfigurationButtons() {
+        return super.getConfigurationButtons();
     }
 }

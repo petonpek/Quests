@@ -13,7 +13,7 @@ public class QuestsEditCommand extends SubCommand {
     private QuestsPlugin plugin;
     
     public QuestsEditCommand(QuestsPlugin plugin) {
-        super("quests.admin", plugin, false);
+        super(QuestsPlugin.CREATOR_PERMISSION, plugin, false);
         
         this.plugin = plugin;
     }

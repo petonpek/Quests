@@ -20,7 +20,7 @@ public class AvatarSetGenderCommand extends SubCommand {
     private QuestsPlugin plugin;
     
     public AvatarSetGenderCommand(QuestsPlugin plugin) {
-        super("quests.admin", plugin, false);
+        super(QuestsPlugin.CREATOR_PERMISSION, plugin, false);
         
         this.plugin = plugin;
     }

@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 
 public class AvatarConversationCommandHandler extends SubCommandHandler {
     public AvatarConversationCommandHandler(QuestsPlugin plugin) {
-        super("quests.admin", plugin, false, 1);
+        super(QuestsPlugin.CREATOR_PERMISSION, plugin, false, 1);
         
         registerSubCommand("next", new AvatarConversationNextCommand(plugin));
         registerSubCommand("assign", new AvatarConversationAssignCommand(plugin));

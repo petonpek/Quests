@@ -21,7 +21,7 @@ public class QuestsSetColorCommand extends SubCommand {
     private QuestsPlugin plugin;
     
     public QuestsSetColorCommand(QuestsPlugin plugin) {
-        super("quests.admin", plugin, false);
+        super(QuestsPlugin.CREATOR_PERMISSION, plugin, false);
         
         this.plugin = plugin;
     }
@@ -30,7 +30,9 @@ public class QuestsSetColorCommand extends SubCommand {
     protected List<String> onTabComplete(CommandSender sender, String[] args) {
         
         if (args.length == 2)
-            return Utils.getMatches(args[1], plugin.getQuests().stream().map(Quest::getId).collect(Collectors.toList()));
+            return Utils.getMatches(args[1], plugin.getQuests().stream()
+                    .filter(q -> sender.isOp() || (q.isByContentTeam() && sender.hasPermission(QuestsPlugin.CREATOR_PERMISSION)))
+                    .map(Quest::getId).collect(Collectors.toList()));
         if (args.length == 3)
             return Utils.getMatches(args[2], Arrays.stream(org.bukkit.ChatColor.values()).map(Enum::name).collect(Collectors.toList()));
         

@@ -59,7 +59,9 @@ public class QuestStepNPCInteraction extends QuestStepItem {
     }
     
     @Override
-    protected List<MenuItem> getConfigurationButtons(List<MenuItem> defaults) {
+    protected List<MenuItem> getConfigurationButtons() {
+        List<MenuItem> defaults = super.getConfigurationButtons();
+        
         defaults.add(new MenuItem(new ItemBuilder(Material.PLAYER_HEAD).setDisplayName("&e&lChange NPC")
                 .setLore("", "&8→ &6Click to set NPC").build()).addClickAction(click -> {
             Player player = click.getPlayer();

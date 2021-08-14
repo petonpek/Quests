@@ -19,7 +19,7 @@ public class AvatarConversationRemoveCommand extends SubCommand {
     private QuestsPlugin plugin;
     
     public AvatarConversationRemoveCommand(QuestsPlugin plugin) {
-        super("quests.admin", plugin, false);
+        super(QuestsPlugin.ADMIN_PERMISSION, plugin, false);
         
         this.plugin = plugin;
     }

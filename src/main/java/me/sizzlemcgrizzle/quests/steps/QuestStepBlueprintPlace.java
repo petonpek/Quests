@@ -62,7 +62,9 @@ public class QuestStepBlueprintPlace extends QuestStepItem {
     }
     
     @Override
-    protected List<MenuItem> getConfigurationButtons(List<MenuItem> defaults) {
+    protected List<MenuItem> getConfigurationButtons() {
+        List<MenuItem> defaults = super.getConfigurationButtons();
+        
         defaults.add(new MenuItem(new ItemBuilder(Material.STONE).setCustomModelData(1).setDisplayName("&e&lChange Blueprint Type")
                 .setLore("", "&7Blueprint type: &6" + type, "", "&8→ &6Click to set blueprint type").build())
                 .addClickAction(click -> {

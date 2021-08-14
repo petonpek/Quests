@@ -11,3 +11,6 @@ commands:
 permissions:
   quests.admin:
     default: op
+  quests.content:
+    default: op
+    description: players with this permission can create their own quests, but not use rewards or delete old quests

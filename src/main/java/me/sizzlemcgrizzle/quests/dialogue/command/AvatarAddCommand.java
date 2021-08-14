@@ -16,7 +16,7 @@ public class AvatarAddCommand extends SubCommand {
     private QuestsPlugin plugin;
     
     public AvatarAddCommand(QuestsPlugin plugin) {
-        super("quests.admin", plugin, false);
+        super(QuestsPlugin.ADMIN_PERMISSION, plugin, false);
         
         this.plugin = plugin;
     }

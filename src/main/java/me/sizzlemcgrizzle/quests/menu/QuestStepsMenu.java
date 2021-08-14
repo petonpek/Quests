@@ -4,6 +4,8 @@ import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.menu.MenuItem;
 import de.craftlancer.core.menu.PagedMenu;
 import de.craftlancer.core.util.ItemBuilder;
+import de.craftlancer.core.util.MessageLevel;
+import de.craftlancer.core.util.MessageUtil;
 import me.sizzlemcgrizzle.quests.Quest;
 import me.sizzlemcgrizzle.quests.QuestsPlugin;
 import me.sizzlemcgrizzle.quests.util.UserInputManager;
@@ -60,6 +62,11 @@ public class QuestStepsMenu implements Listener {
                 .addClickAction(click -> {
                     Player player = click.getPlayer();
                     
+                    if (!player.hasPermission(QuestsPlugin.ADMIN_PERMISSION)) {
+                        MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "Only admins can do this.");
+                        return;
+                    }
+                    
                     new LambdaRunnable(player::closeInventory).runTaskLater(plugin, 1);
                     
                     plugin.getUserInputManager().getInput(player, new UserInputManager.NumberInputPrompt("&bEnter a positive number of seconds.",
@@ -78,6 +85,13 @@ public class QuestStepsMenu implements Listener {
                         "",
                         "&8→ &6Click to toggle repeatable").build())
                 .addClickAction(click -> {
+                    Player player = click.getPlayer();
+                    
+                    if (!player.hasPermission(QuestsPlugin.ADMIN_PERMISSION)) {
+                        MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "Only admins can do this.");
+                        return;
+                    }
+                    
                     quest.setRepeatable(!quest.isRepeatable());
                     
                     createMenu();
@@ -90,6 +104,14 @@ public class QuestStepsMenu implements Listener {
                         "",
                         "&8→ &6Click to toggle automatic start").build())
                 .addClickAction(click -> {
+                    
+                    Player player = click.getPlayer();
+                    
+                    if (!player.hasPermission(QuestsPlugin.ADMIN_PERMISSION)) {
+                        MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "Only admins can do this.");
+                        return;
+                    }
+                    
                     quest.setStartsAutomatically(!quest.startsAutomatically());
                     
                     createMenu();
@@ -102,6 +124,14 @@ public class QuestStepsMenu implements Listener {
                         "",
                         "&8→ &6Click to toggle public").build())
                 .addClickAction(click -> {
+                    
+                    Player player = click.getPlayer();
+                    
+                    if (!player.hasPermission(QuestsPlugin.ADMIN_PERMISSION)) {
+                        MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "Only admins can do this.");
+                        return;
+                    }
+                    
                     quest.setPublic(!quest.isPublic());
                     
                     createMenu();

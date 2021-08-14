@@ -147,28 +147,7 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
     
     protected abstract Material getMenuMaterial();
     
-    protected abstract List<MenuItem> getConfigurationButtons(List<MenuItem> defaults);
-    
-    public ItemStack getMenuItem() {
-        ItemBuilder builder = new ItemBuilder(getMenuMaterial());
-        
-        builder.addLore("");
-        if (location != null)
-            builder.addLore("&7Location: &6(" + ((int) getLocation().getX()) + ", " + ((int) getLocation().getY()) + ", " + ((int) getLocation().getZ()) + ")");
-        builder.addLore("&7Total weight: &6" + totalWeight, "");
-        
-        return builder.build();
-    }
-    
-    public void display(Player player) {
-        if (configurationMenu == null)
-            createMenu();
-        
-        player.openInventory(configurationMenu.getInventory());
-    }
-    
-    public void createMenu() {
-        
+    protected List<MenuItem> getConfigurationButtons() {
         List<MenuItem> buttons = new ArrayList<>();
         
         buttons.add(new MenuItem(new ItemBuilder(Material.STONE_BRICKS).setDisplayName("&e&lChange Location")
@@ -205,7 +184,11 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
         buttons.add(new MenuItem(new ItemBuilder(Material.EMERALD).setDisplayName("&e&lEdit Reward")
                 .setLore("", "&8→ &6Click to edit reward").build()).addClickAction(click -> {
             Player player = click.getPlayer();
-            reward.display(player, this);
+            
+            if (player.hasPermission(QuestsPlugin.ADMIN_PERMISSION))
+                reward.display(player, this);
+            else
+                MessageUtil.sendMessage(QuestsPlugin.getInstance(), player, MessageLevel.INFO, "Only admins can edit rewards.");
         }));
         
         buttons.add(new MenuItem(new ItemBuilder(Material.COMPASS).setDisplayName("&e&lSet Direction Description")
@@ -239,7 +222,30 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
             conversation.display(player);
         }));
         
-        buttons = getConfigurationButtons(buttons);
+        return buttons;
+    }
+    
+    public ItemStack getMenuItem() {
+        ItemBuilder builder = new ItemBuilder(getMenuMaterial());
+        
+        builder.addLore("");
+        if (location != null)
+            builder.addLore("&7Location: &6(" + ((int) getLocation().getX()) + ", " + ((int) getLocation().getY()) + ", " + ((int) getLocation().getZ()) + ")");
+        builder.addLore("&7Total weight: &6" + totalWeight, "");
+        
+        return builder.build();
+    }
+    
+    public void display(Player player) {
+        if (configurationMenu == null)
+            createMenu();
+        
+        player.openInventory(configurationMenu.getInventory());
+    }
+    
+    public void createMenu() {
+        
+        List<MenuItem> buttons = getConfigurationButtons();
         
         int rows = buttons.size() / 9 + 1;
         
@@ -254,7 +260,7 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
             Player player = click.getPlayer();
             getQuest().getMenu().display(player);
         });
-        configurationMenu.set(buttons.size(), exitButton);
+        configurationMenu.set(rows * 9 - 1, exitButton);
     }
     
     public AvatarConversation getConversation() {

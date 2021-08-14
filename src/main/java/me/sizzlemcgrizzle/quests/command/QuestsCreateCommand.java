@@ -10,6 +10,7 @@ import me.sizzlemcgrizzle.quests.QuestsPlugin;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,7 +22,7 @@ public class QuestsCreateCommand extends SubCommand {
     private QuestsPlugin plugin;
     
     public QuestsCreateCommand(QuestsPlugin plugin) {
-        super("quests.admin", plugin, false);
+        super(QuestsPlugin.CREATOR_PERMISSION, plugin, false);
         
         this.plugin = plugin;
     }
@@ -53,6 +54,7 @@ public class QuestsCreateCommand extends SubCommand {
             return null;
         }
         
+        Player player = (Player) sender;
         String name, permission = "";
         ChatColor chatColor = ChatColor.DARK_PURPLE;
         
@@ -64,7 +66,7 @@ public class QuestsCreateCommand extends SubCommand {
         if (args.length > 3)
             permission = args[3];
         
-        plugin.getQuests().add(new Quest(name, chatColor, permission));
+        plugin.getQuests().add(new Quest(name, !player.hasPermission(QuestsPlugin.ADMIN_PERMISSION) && player.hasPermission(QuestsPlugin.CREATOR_PERMISSION), chatColor, permission));
         plugin.getQuestMenu().getPlayerMenus().clear();
         
         MessageUtil.sendMessage(plugin, sender, MessageLevel.SUCCESS, "Successfully added new quest. To use this quest, switch visibility to public.");

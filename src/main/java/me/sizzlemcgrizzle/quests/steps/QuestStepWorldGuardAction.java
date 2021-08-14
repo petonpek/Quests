@@ -88,7 +88,9 @@ public class QuestStepWorldGuardAction extends QuestStep {
     }
     
     @Override
-    protected List<MenuItem> getConfigurationButtons(List<MenuItem> defaults) {
+    protected List<MenuItem> getConfigurationButtons() {
+        List<MenuItem> defaults = super.getConfigurationButtons();
+        
         defaults.add(new MenuItem(new ItemBuilder(Material.WOODEN_AXE).setDisplayName("&e&lChange World Guard Region")
                 .setLore("", "&7Region name: &6" + regionName, "", "&8→ &6Click to set region").build()).addClickAction(click -> {
             Player player = click.getPlayer();

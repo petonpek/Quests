@@ -51,7 +51,9 @@ public class QuestStepPortalUse extends QuestStepItem {
     }
     
     @Override
-    protected List<MenuItem> getConfigurationButtons(List<MenuItem> defaults) {
+    protected List<MenuItem> getConfigurationButtons() {
+        List<MenuItem> defaults = super.getConfigurationButtons();
+        
         defaults.set(0, new MenuItem(new ItemBuilder(Material.CHISELED_QUARTZ_BLOCK).setDisplayName("&e&lSet Portal")
                 .addLore("", "&8→ &6Click to set portal").build())
                 .addClickAction(click -> {

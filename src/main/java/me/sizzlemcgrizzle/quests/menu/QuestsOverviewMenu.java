@@ -33,7 +33,8 @@ public class QuestsOverviewMenu {
         PagedMenu menu = playerMenus.computeIfAbsent(player.getUniqueId(),
                 e -> new PagedMenu(plugin, "Quests", true, 5,
                         plugin.getQuests().stream()
-                                //.filter(q -> player.hasPermission("quests.admin") || q.isPublic())
+                                .filter(q -> player.hasPermission(QuestsPlugin.ADMIN_PERMISSION) || (q.isByContentTeam() && player.hasPermission(QuestsPlugin.CREATOR_PERMISSION)))
+                                //.filter(q -> player.hasPermission(QuestsPlugin.ADMIN_PERMISSION) || q.isPublic())
                                 //.sorted(Comparator.comparingInt(q -> q.getProgress().containsKey(player.getUniqueId()) ? 0 : q.canStartQuest(player) ? 1 : 2))
                                 .map(quest -> {
                                     
@@ -45,9 +46,9 @@ public class QuestsOverviewMenu {
                                         builder.addLore("");
                                     builder.addLore(quest.getDescription());
                                     
-                                    if (player.hasPermission("quests.admin"))
+                                    if (player.hasPermission(QuestsPlugin.CREATOR_PERMISSION))
                                         builder.addLore("",
-                                                "&c--- Admin Visible Only ---",
+                                                "&c--- Content Team Visible Only ---",
                                                 "&8→ &6Left click to edit",
                                                 "&8→ &6Right click to add description line",
                                                 "&8→ &6Shift left click to remove last description line",
@@ -55,11 +56,11 @@ public class QuestsOverviewMenu {
                                     
                                     MenuItem item = new MenuItem(builder.build());
                                     
-                                    if (player.hasPermission("quests.admin")) {
+                                    if (player.hasPermission(QuestsPlugin.CREATOR_PERMISSION)) {
                                         item.addClickAction(click -> {
                                             Player p = click.getPlayer();
                                             
-                                            if (p.hasPermission("quests.admin"))
+                                            if (p.hasPermission(QuestsPlugin.CREATOR_PERMISSION))
                                                 quest.getMenu().display(p);
                                         }, ClickType.LEFT)
                                                 .addClickAction(click -> {

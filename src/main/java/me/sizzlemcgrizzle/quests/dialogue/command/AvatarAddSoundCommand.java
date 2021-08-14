@@ -19,7 +19,7 @@ public class AvatarAddSoundCommand extends SubCommand {
     private QuestsPlugin plugin;
     
     public AvatarAddSoundCommand(QuestsPlugin plugin) {
-        super("quests.admin", plugin, false);
+        super(QuestsPlugin.CREATOR_PERMISSION, plugin, false);
         
         this.plugin = plugin;
     }

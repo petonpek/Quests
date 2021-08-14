@@ -72,7 +72,9 @@ public abstract class QuestStepItem extends QuestStep {
     }
     
     @Override
-    protected List<MenuItem> getConfigurationButtons(List<MenuItem> defaults) {
+    protected List<MenuItem> getConfigurationButtons() {
+        List<MenuItem> defaults = super.getConfigurationButtons();
+        
         defaults.add(new MenuItem(new ItemBuilder(Material.CHEST).setDisplayName("&e&lSet Item")
                 .setLore("", "&7Current item: &6" + ((item == null || item.getType().isAir() ? "none" :
                                 "x" + item.getAmount() + " " + (item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName() : item.getType().name()))),

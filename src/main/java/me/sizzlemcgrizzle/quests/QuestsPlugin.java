@@ -48,6 +48,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class QuestsPlugin extends JavaPlugin implements Listener {
+    
+    public static String CREATOR_PERMISSION = "quests.content";
+    public static String ADMIN_PERMISSION = "quests.admin";
+    
     private static QuestsPlugin instance;
     
     private List<Quest> quests;
@@ -205,7 +209,7 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
         if (convo == null)
             return;
         
-        if (player.isOp() && player.isSneaking())
+        if (player.hasPermission(QuestsPlugin.ADMIN_PERMISSION) && player.isSneaking())
             convo.display(player);
         else
             convo.next(player);
@@ -220,7 +224,7 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
         if (convo == null)
             return;
         
-        if (player.isOp() && player.isSneaking())
+        if (player.hasPermission(QuestsPlugin.ADMIN_PERMISSION) && player.isSneaking())
             convo.display(player);
         else
             convo.next(player);
