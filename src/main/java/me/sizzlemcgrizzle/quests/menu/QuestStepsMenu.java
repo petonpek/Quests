@@ -46,6 +46,7 @@ public class QuestStepsMenu implements Listener {
                     return new MenuItem(builder.build()).addClickAction(click -> step.display(click.getPlayer()), ClickType.LEFT)
                             .addClickAction(click -> selectionMenu.display(click.getPlayer(), val), ClickType.RIGHT)
                             .addClickAction(click -> {
+                                quest.clearAllProgress();
                                 quest.getSteps().remove(step);
                                 
                                 createMenu();

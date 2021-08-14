@@ -88,6 +88,14 @@ public class Quest implements ConfigurationSerializable {
         })).runTaskTimer(QuestsPlugin.getInstance(), 0, 3);
     }
     
+    public void clearAllProgress() {
+        progress.entrySet().removeIf(e -> {
+            steps.get(e.getValue().getStepID()).getConversation().getConversing().remove(e.getKey());
+            
+            return true;
+        });
+    }
+    
     public void abandon(UUID uuid, boolean withTimeout) {
         
         steps.get(progress.get(uuid).getStepID()).getConversation().getConversing().remove(uuid);
