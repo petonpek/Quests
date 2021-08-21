@@ -266,4 +266,8 @@ public abstract class QuestStep implements ConfigurationSerializable, Listener {
     public AvatarConversation getConversation() {
         return conversation;
     }
+
+    public void setShowCompass(boolean showCompass) {
+        this.showCompass = showCompass;
+    }
 }

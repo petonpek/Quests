@@ -9,14 +9,7 @@ import de.craftlancer.core.util.MessageLevel;
 import de.craftlancer.core.util.MessageUtil;
 import me.sizzlemcgrizzle.quests.Quest;
 import me.sizzlemcgrizzle.quests.QuestsPlugin;
-import me.sizzlemcgrizzle.quests.steps.QuestStepAdminShopTrade;
-import me.sizzlemcgrizzle.quests.steps.QuestStepBlockInteract;
-import me.sizzlemcgrizzle.quests.steps.QuestStepBlueprintPlace;
-import me.sizzlemcgrizzle.quests.steps.QuestStepMythicMobInteraction;
-import me.sizzlemcgrizzle.quests.steps.QuestStepMythicMobKill;
-import me.sizzlemcgrizzle.quests.steps.QuestStepNPCInteraction;
-import me.sizzlemcgrizzle.quests.steps.QuestStepPortalUse;
-import me.sizzlemcgrizzle.quests.steps.QuestStepWorldGuardAction;
+import me.sizzlemcgrizzle.quests.steps.*;
 import me.sizzlemcgrizzle.quests.util.UserInputManager;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -40,7 +33,7 @@ public class QuestStepsSelectionMenu {
     }
     
     public void createMenu(int index) {
-        this.menu = new Menu(plugin, "Step Selection", 1);
+        this.menu = new Menu(plugin, "Step Selection", 3);
         
         ItemStack blockInteractionItem = new ItemBuilder(Material.STONE_BRICKS).setDisplayName("&e&lBlock Interaction").build();
         ItemStack entityInteractionItem = new ItemBuilder(Material.ZOMBIE_HEAD).setDisplayName("&e&lNPC Interaction").build();
@@ -50,6 +43,7 @@ public class QuestStepsSelectionMenu {
         ItemStack adminShopTradeItem = new ItemBuilder(Material.END_PORTAL_FRAME).setDisplayName("&e&lAdmin Shop Trade").build();
         ItemStack blueprintPlaceItem = new ItemBuilder(Material.STONE).setCustomModelData(1).setDisplayName("&e&lBlueprint Placement").build();
         ItemStack portalUseItem = new ItemBuilder(Material.CHISELED_QUARTZ_BLOCK).setCustomModelData(1).setDisplayName("&e&lPortal Use").build();
+        ItemStack conditionalAbandonItem = new ItemBuilder(Material.REDSTONE_BLOCK).setDisplayName("&e&lConditional Abandon").build();
         
         MenuItem blockInteractionMenuItem = new MenuItem(blockInteractionItem).addClickAction(click -> {
             Player player = click.getPlayer();
@@ -176,6 +170,14 @@ public class QuestStepsSelectionMenu {
                         quest.getMenu().display(player);
                     });
         });
+
+        MenuItem conditionalAbandonMenuItem = new MenuItem(conditionalAbandonItem).addClickAction(click -> {
+            Player player = click.getPlayer();
+
+            quest.getSteps().add(index, new QuestStepConditionalAbandon(quest, player.getLocation(), new ItemStack(Material.AIR)));
+            quest.getMenu().createMenu();
+            quest.getMenu().display(player);
+        });
         
         menu.set(0, blockInteractionMenuItem);
         menu.set(1, entityInteractionMenuItem);
@@ -185,6 +187,7 @@ public class QuestStepsSelectionMenu {
         menu.set(5, adminShopMenuItem);
         menu.set(6, blueprintPlaceMenuItem);
         menu.set(7, portalUseMenuItem);
-        menu.set(8, exitButton);
+        menu.set(8, conditionalAbandonMenuItem);
+        menu.set(26, exitButton);
     }
 }

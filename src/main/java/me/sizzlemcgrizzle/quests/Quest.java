@@ -4,6 +4,7 @@ import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.navigation.NavigationUtil;
 import de.craftlancer.core.resourcepack.ResourcePackManager;
 import me.sizzlemcgrizzle.quests.menu.QuestStepsMenu;
+import me.sizzlemcgrizzle.quests.steps.InstantComplete;
 import me.sizzlemcgrizzle.quests.steps.QuestStep;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
@@ -47,8 +48,6 @@ public class Quest implements ConfigurationSerializable {
         this.description = new ArrayList<>();
         this.color = color;
         this.contentTeam = contentTeam;
-        
-        start();
     }
     
     public Quest(Map<String, Object> map) {
@@ -66,26 +65,6 @@ public class Quest implements ConfigurationSerializable {
         this.timeout = (int) map.getOrDefault("timeout", 0);
         this.startAutomatically = (boolean) map.getOrDefault("startAutomatically", false);
         this.contentTeam = (boolean) map.getOrDefault("contentTeam", false);
-        
-        start();
-    }
-    
-    private void start() {
-        new LambdaRunnable(() -> progress.forEach((uuid, p) -> {
-            Player player = Bukkit.getPlayer(uuid);
-            
-            if (player == null)
-                return;
-            
-            if (steps.isEmpty())
-                return;
-            
-            QuestStep step = steps.get(p.getStepID());
-            
-            String emoji = step.isShowingCompass() && ResourcePackManager.getInstance().isFullyAccepted(player) ? NavigationUtil.getUnicode(player, steps.get(p.getStepID()).getLocation()) : "";
-            
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(emoji + ChatColor.GOLD + " " + steps.get(p.getStepID()).getCompassDescription(player)));
-        })).runTaskTimer(QuestsPlugin.getInstance(), 0, 3);
     }
     
     public void clearAllProgress() {
@@ -202,7 +181,14 @@ public class Quest implements ConfigurationSerializable {
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.GOLD + "Quest complete!"));
             return;
         }
-        
+
+        QuestStep step = steps.get(nextStepID);
+
+        if (step instanceof InstantComplete) {
+            step.onStepAction(player, step.getTotalWeight());
+            nextStepID += 1;
+        }
+
         p.setCompletedWeight(0);
         p.setStepID(nextStepID);
     }

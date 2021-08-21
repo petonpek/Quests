@@ -149,6 +149,8 @@ public class AssignedConversation extends AvatarConversation {
                             quest.start(click.getPlayer());
                             player.closeInventory();
                         } else {
+                            MessageUtil.sendMessage(QuestsPlugin.getInstance(), player,
+                                    MessageLevel.INFO, "You cannot accept this quest right now. Use /quests abandon if you have an active quest.");
                             player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5F, 1F);
                         }
                     }));
