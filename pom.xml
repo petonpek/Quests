@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.sizzlemcgrizzle</groupId>
     <artifactId>quests</artifactId>
-    <version>1.0.11</version>
+    <version>1.0.12</version>
     <name>Quests</name>
 
     <properties>
@@ -43,7 +43,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.16.2-R0.1-SNAPSHOT</version>
+            <version>1.16.5-R0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -53,22 +53,16 @@
         </dependency>
 
         <dependency>
-            <groupId>de.craftlancer</groupId>
-            <artifactId>clstuff</artifactId>
-            <version>0.3.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>de.craftlancer</groupId>
-            <artifactId>clfeatures</artifactId>
-            <version>0.3.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
             <groupId>io.lumine.xikage</groupId>
             <artifactId>MythicMobs</artifactId>
             <version>4.9.1</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -87,16 +81,15 @@
         </dependency>
 
         <dependency>
-            <groupId>net.raidstone</groupId>
-            <artifactId>WorldGuardEvents</artifactId>
-            <version>1.16.4</version>
-            <scope>provided</scope>
+            <groupId>de.craftlancer</groupId>
+            <artifactId>clapi</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
-            <groupId>me.sizzlemcgrizzle</groupId>
-            <artifactId>blueprints</artifactId>
-            <version>1.7.6</version>
+            <groupId>net.raidstone</groupId>
+            <artifactId>WorldGuardEvents</artifactId>
+            <version>1.16.4</version>
             <scope>provided</scope>
         </dependency>
 

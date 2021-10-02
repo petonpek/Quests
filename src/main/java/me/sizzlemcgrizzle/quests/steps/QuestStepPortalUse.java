@@ -1,6 +1,6 @@
 package me.sizzlemcgrizzle.quests.steps;
 
-import de.craftlancer.clfeatures.portal.event.PortalTeleportEvent;
+import de.craftlancer.clapi.clfeatures.portal.event.PortalTeleportEvent;
 import de.craftlancer.core.menu.MenuItem;
 import de.craftlancer.core.util.ItemBuilder;
 import de.craftlancer.core.util.MessageLevel;

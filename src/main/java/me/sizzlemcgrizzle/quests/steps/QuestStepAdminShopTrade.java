@@ -1,6 +1,6 @@
 package me.sizzlemcgrizzle.quests.steps;
 
-import de.craftlancer.clstuff.adminshop.AdminShopTransactionEvent;
+import de.craftlancer.clapi.clstuff.adminshop.event.AdminShopTransactionEvent;
 import de.craftlancer.core.menu.MenuItem;
 import de.craftlancer.core.util.ItemBuilder;
 import me.sizzlemcgrizzle.quests.Quest;

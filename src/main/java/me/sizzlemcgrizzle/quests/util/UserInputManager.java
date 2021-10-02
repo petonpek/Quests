@@ -1,7 +1,8 @@
 package me.sizzlemcgrizzle.quests.util;
 
-import de.craftlancer.clfeatures.CLFeatures;
-import de.craftlancer.clfeatures.portal.PortalFeatureInstance;
+import de.craftlancer.clapi.LazyService;
+import de.craftlancer.clapi.clfeatures.PluginCLFeatures;
+import de.craftlancer.clapi.clfeatures.portal.AbstractPortalFeatureInstance;
 import io.lumine.xikage.mythicmobs.MythicMobs;
 import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
 import io.lumine.xikage.mythicmobs.mobs.MythicMob;
@@ -34,10 +35,12 @@ import java.util.function.Predicate;
 
 public class UserInputManager implements Listener {
     
+    private static final LazyService<PluginCLFeatures> CLFEATURES = new LazyService<>(PluginCLFeatures.class);
+    
     private final QuestsPlugin plugin;
     private final Map<UUID, Consumer<NPC>> inputMapNPC = new HashMap<>();
     private final Map<UUID, Consumer<Block>> inputMapBlock = new HashMap<>();
-    private final Map<UUID, Consumer<PortalFeatureInstance>> inputMapPortal = new HashMap<>();
+    private final Map<UUID, Consumer<AbstractPortalFeatureInstance>> inputMapPortal = new HashMap<>();
     private final Map<UUID, BiConsumer<MythicMob, ActiveMob>> inputMapMythicMob = new HashMap<>();
     
     public UserInputManager(QuestsPlugin plugin) {
@@ -60,11 +63,11 @@ public class UserInputManager implements Listener {
             return;
         
         if (inputMapPortal.containsKey(event.getPlayer().getUniqueId())) {
-            CLFeatures.getInstance().getFeature("portal").getFeatures().stream()
+            CLFEATURES.get().getFeature("portal").getFeatures().stream()
                     .filter(f -> f.getStructure().containsBlock(event.getClickedBlock()))
                     .findFirst()
                     .ifPresent(portalFeatureInstance -> inputMapPortal.remove(event.getPlayer().getUniqueId())
-                            .accept((PortalFeatureInstance) portalFeatureInstance));
+                            .accept((AbstractPortalFeatureInstance) portalFeatureInstance));
         }
         
         Optional.ofNullable(inputMapBlock.remove(event.getPlayer().getUniqueId())).ifPresent(c -> {
@@ -99,7 +102,7 @@ public class UserInputManager implements Listener {
         inputMapBlock.put(player.getUniqueId(), consumer);
     }
     
-    public void getPortalInput(Player player, Consumer<PortalFeatureInstance> consumer) {
+    public void getPortalInput(Player player, Consumer<AbstractPortalFeatureInstance> consumer) {
         inputMapPortal.put(player.getUniqueId(), consumer);
     }
     

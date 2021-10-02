@@ -1,8 +1,8 @@
 package me.sizzlemcgrizzle.quests.steps;
 
+import de.craftlancer.clapi.blueprints.event.BlueprintPostPasteEvent;
 import de.craftlancer.core.menu.MenuItem;
 import de.craftlancer.core.util.ItemBuilder;
-import me.sizzlemcgrizzle.blueprints.api.BlueprintPostPasteEvent;
 import me.sizzlemcgrizzle.quests.Quest;
 import me.sizzlemcgrizzle.quests.QuestsPlugin;
 import me.sizzlemcgrizzle.quests.util.UserInputManager;
