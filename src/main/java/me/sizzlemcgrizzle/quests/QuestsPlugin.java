@@ -14,13 +14,9 @@ import me.sizzlemcgrizzle.quests.dialogue.AvatarConversation;
 import me.sizzlemcgrizzle.quests.dialogue.AvatarMessage;
 import me.sizzlemcgrizzle.quests.dialogue.RecommendedConversation;
 import me.sizzlemcgrizzle.quests.dialogue.command.AvatarCommandHandler;
-import me.sizzlemcgrizzle.quests.dialogue.wrapper.MythicMobWrapper;
-import me.sizzlemcgrizzle.quests.dialogue.wrapper.NPCWrapper;
-import me.sizzlemcgrizzle.quests.dialogue.wrapper.QuestEntityWrapper;
 import me.sizzlemcgrizzle.quests.menu.QuestsOverviewMenu;
 import me.sizzlemcgrizzle.quests.steps.*;
 import me.sizzlemcgrizzle.quests.util.UserInputManager;
-import net.citizensnpcs.api.event.NPCRemoveEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
@@ -28,7 +24,6 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import org.bukkit.entity.NPC;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -57,12 +52,9 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
     
     private List<Quest> quests;
     private List<Avatar> avatars;
-
-    //Unused
-    private Map<MythicMob, AssignedConversation> mythicMobConversations;
-    private Map<Integer, AssignedConversation> npcConversations;
-
-    private List<QuestEntityWrapper> wrappers;
+    
+    private Map<MythicMob, AssignedConversation> mythicMobConversations = new HashMap<>();
+    private Map<Integer, AssignedConversation> npcConversations = new HashMap<>();
     
     private QuestsOverviewMenu questMenu;
     private UserInputManager userInputManager;
@@ -94,7 +86,6 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
         ConfigurationSerialization.registerClass(AssignedConversation.class);
         ConfigurationSerialization.registerClass(RecommendedConversation.class);
         ConfigurationSerialization.registerClass(QuestStepConditionalAbandon.class);
-        ConfigurationSerialization.registerClass(QuestEntityWrapper.class);
         
         MessageUtil.register(this, new TextComponent("§8[§cQuests§8]"));
         
@@ -122,23 +113,6 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
                     .collect(Collectors.toMap(
                             e -> Integer.valueOf(e.getKey()),
                             e -> (AssignedConversation) e.getValue()));
-
-        if (config.getConfigurationSection("wrappers") != null)
-            wrappers = (List<QuestEntityWrapper>) config.getList("wrappers");
-        else {
-            if (mythicMobConversations != null)
-                wrappers.addAll(
-                        mythicMobConversations
-                                .entrySet()
-                                .stream().map(e -> new MythicMobWrapper(e.getKey(), null, e.getValue()))
-                                .collect(Collectors.toList()));
-            if (npcConversations != null)
-                wrappers.addAll(
-                        npcConversations
-                                .entrySet()
-                                .stream().map(e -> new NPCWrapper(e.getKey(), null, e.getValue()))
-                                .collect(Collectors.toList()));
-        }
         
         questMenu = new QuestsOverviewMenu(this);
         userInputManager = new UserInputManager(this);
@@ -182,11 +156,10 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
         config.set("quests", quests);
         config.set("avatars", avatars);
         config.set("recommendedConversation", recommendedConversation);
-        config.set("wrappers", wrappers);
         
-//        config.set("mythicMobConversations", mythicMobConversations.entrySet().stream().collect(Collectors.toMap(e -> e.getKey().getInternalName(), Map.Entry::getValue)));
-//        config.set("npcConversations", npcConversations.entrySet().stream().collect(Collectors.toMap(e -> String.valueOf(e.getKey()), Map.Entry::getValue)));
-
+        config.set("mythicMobConversations", mythicMobConversations.entrySet().stream().collect(Collectors.toMap(e -> e.getKey().getInternalName(), Map.Entry::getValue)));
+        config.set("npcConversations", npcConversations.entrySet().stream().collect(Collectors.toMap(e -> String.valueOf(e.getKey()), Map.Entry::getValue)));
+        
         BukkitRunnable saveTask = new LambdaRunnable(() -> {
             try {
                 config.save(questsFile);
@@ -228,11 +201,15 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
     public Optional<Avatar> getAvatar(String name) {
         return avatars.stream().filter(a -> a.getName().equalsIgnoreCase(name)).findFirst();
     }
-
-    public List<QuestEntityWrapper> getWrappers() {
-        return wrappers;
+    
+    public Map<MythicMob, AssignedConversation> getMythicMobConversations() {
+        return mythicMobConversations;
     }
-
+    
+    public Map<Integer, AssignedConversation> getNPCConversations() {
+        return npcConversations;
+    }
+    
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
@@ -242,47 +219,30 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
         if (active == null)
             return;
         
-        Optional<QuestEntityWrapper> optional = wrappers
-                .stream()
-                .filter(w -> w instanceof MythicMobWrapper)
-                .filter(w -> ((MythicMobWrapper) w).getMob().equals(active.getType()))
-                .findFirst();
+        AssignedConversation convo = mythicMobConversations.get(active.getType());
         
-        if (!optional.isPresent() || !optional.get().hasConversation())
+        if (convo == null)
             return;
-
-        QuestEntityWrapper wrapper = optional.get();
-
+        
         if (player.hasPermission(QuestsPlugin.ADMIN_PERMISSION) && player.isSneaking())
-            wrapper.getConversation().display(player);
+            convo.display(player);
         else
-            wrapper.getConversation().next(player);
+            convo.next(player);
     }
     
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityInteract(NPCRightClickEvent event) {
         Player player = event.getClicker();
-
-        Optional<QuestEntityWrapper> optional = wrappers
-                .stream()
-                .filter(w -> w instanceof NPCWrapper)
-                .filter(w -> ((NPCWrapper) w).getId() == event.getNPC().getId())
-                .findFirst();
-
-        if (!optional.isPresent() || !optional.get().hasConversation())
+        
+        AssignedConversation convo = npcConversations.get(event.getNPC().getId());
+        
+        if (convo == null)
             return;
-
-        QuestEntityWrapper wrapper = optional.get();
-
+        
         if (player.hasPermission(QuestsPlugin.ADMIN_PERMISSION) && player.isSneaking())
-            wrapper.getConversation().display(player);
+            convo.display(player);
         else
-            wrapper.getConversation().next(player);
-    }
-
-    @EventHandler
-    public void onEntityRemove(NPCRemoveEvent event) {
-        wrappers.removeIf(w -> w instanceof NPCWrapper && ((NPCWrapper) w).getId() == event.getNPC().getId());
+            convo.next(player);
     }
     
     @EventHandler

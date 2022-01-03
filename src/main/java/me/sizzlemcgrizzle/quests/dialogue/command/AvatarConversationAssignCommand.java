@@ -6,8 +6,6 @@ import de.craftlancer.core.util.MessageLevel;
 import de.craftlancer.core.util.MessageUtil;
 import me.sizzlemcgrizzle.quests.QuestsPlugin;
 import me.sizzlemcgrizzle.quests.dialogue.AssignedConversation;
-import me.sizzlemcgrizzle.quests.dialogue.wrapper.MythicMobWrapper;
-import me.sizzlemcgrizzle.quests.dialogue.wrapper.NPCWrapper;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -30,6 +28,8 @@ public class AvatarConversationAssignCommand extends SubCommand {
     protected List<String> onTabComplete(CommandSender sender, String[] args) {
         if (args.length == 3)
             return Utils.getMatches(args[2], Arrays.asList("citizens", "mythicmobs"));
+        if (args.length == 4)
+            return Collections.singletonList("<id>");
         
         return Collections.emptyList();
     }
@@ -46,33 +46,41 @@ public class AvatarConversationAssignCommand extends SubCommand {
             return null;
         }
         
+        if (args.length < 4) {
+            MessageUtil.sendMessage(plugin, sender, MessageLevel.INFO, "You must enter an id.");
+            return null;
+        }
+        
+        if (plugin.getNPCConversations().values().stream().anyMatch(c -> c.getId().equalsIgnoreCase(args[3]))
+                || plugin.getMythicMobConversations().values().stream().anyMatch(c -> c.getId().equalsIgnoreCase(args[3]))) {
+            MessageUtil.sendMessage(plugin, sender, MessageLevel.INFO, "The id you entered already exists.");
+            return null;
+        }
+        
         Player player = (Player) sender;
         
         if (args[2].equalsIgnoreCase("citizens")) {
             MessageUtil.sendMessage(plugin, sender, MessageLevel.INFO, "Right click an NPC.");
             plugin.getUserInputManager().getNPCInput(player, npc -> {
-                if (plugin.getWrappers().stream()
-                        .anyMatch(w -> w instanceof NPCWrapper && ((NPCWrapper) w).getId() == npc.getId()))
+                AssignedConversation convo = new AssignedConversation(args[3]);
+                
+                if (plugin.getNPCConversations().containsKey(npc.getId()))
                     MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "A conversation is already assigned to this NPC.");
-                else {
-                    NPCWrapper wrapper = new NPCWrapper(npc.getId(),npc.getEntity().getLocation());
-                    plugin.getWrappers().add(wrapper);
-                    wrapper.getConversation().display(player);
-                }
+                else
+                    plugin.getNPCConversations().put(npc.getId(), convo);
+                convo.display(player);
             });
         }
         
         if (args[2].equalsIgnoreCase("mythicmobs")) {
             MessageUtil.sendMessage(plugin, sender, MessageLevel.INFO, "Right click a mythic mob.");
             plugin.getUserInputManager().getMythicMobInput(player, (mm, active) -> {
-                if (plugin.getWrappers().stream()
-                        .anyMatch(w -> w instanceof MythicMobWrapper && ((MythicMobWrapper) w).getMob().equals(mm)))
+                AssignedConversation convo = new AssignedConversation(args[3]);
+                if (plugin.getMythicMobConversations().containsKey(mm))
                     MessageUtil.sendMessage(plugin, player, MessageLevel.INFO, "A conversation is already assigned to this Mythic Mob.");
-                else {
-                    MythicMobWrapper wrapper = new MythicMobWrapper(mm, active.getEntity().getBukkitEntity().getLocation());
-                    plugin.getWrappers().add(wrapper);
-                    wrapper.getConversation().display(player);
-                }
+                else
+                    plugin.getMythicMobConversations().put(mm, convo);
+                convo.display(player);
             });
         }
         
