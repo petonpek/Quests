@@ -3,6 +3,7 @@ package me.sizzlemcgrizzle.quests;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.navigation.NavigationUtil;
 import de.craftlancer.core.resourcepack.ResourcePackManager;
+import de.craftlancer.core.util.MessageUtil;
 import me.sizzlemcgrizzle.quests.menu.QuestStepsMenu;
 import me.sizzlemcgrizzle.quests.steps.InstantComplete;
 import me.sizzlemcgrizzle.quests.steps.QuestStep;
@@ -83,6 +84,8 @@ public class Quest implements ConfigurationSerializable {
         
         if (withTimeout)
             completed.put(uuid, System.currentTimeMillis());
+        
+        MessageUtil.sendBossBarMessage(QuestsPlugin.getInstance(), Bukkit.getPlayer(uuid),"Quest abandoned", 80);
     }
     
     @NotNull
@@ -177,8 +180,8 @@ public class Quest implements ConfigurationSerializable {
             completed.put(player.getUniqueId(), System.currentTimeMillis());
             
             QuestsPlugin.getInstance().getQuestMenu().getPlayerMenus().remove(player.getUniqueId());
-            
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.GOLD + "Quest complete!"));
+    
+            MessageUtil.sendBossBarMessage(QuestsPlugin.getInstance(),player, ChatColor.GOLD + "Quest complete!", 80);
             return;
         }
 

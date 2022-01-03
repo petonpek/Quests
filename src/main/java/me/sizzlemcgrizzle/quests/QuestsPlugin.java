@@ -3,6 +3,7 @@ package me.sizzlemcgrizzle.quests;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.navigation.NavigationUtil;
 import de.craftlancer.core.resourcepack.ResourcePackManager;
+import de.craftlancer.core.util.BossBarMessageRegistrable;
 import de.craftlancer.core.util.MessageUtil;
 import io.lumine.xikage.mythicmobs.MythicMobs;
 import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
@@ -43,7 +44,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class QuestsPlugin extends JavaPlugin implements Listener {
+public class QuestsPlugin extends JavaPlugin implements Listener, BossBarMessageRegistrable {
     
     public static String CREATOR_PERMISSION = "quests.content";
     public static String ADMIN_PERMISSION = "quests.admin";
@@ -135,8 +136,8 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
             QuestStep step = quest.getSteps().get(p.getStepID());
 
             String emoji = step.isShowingCompass() && ResourcePackManager.getInstance().isFullyAccepted(player) ? NavigationUtil.getUnicode(player, step.getLocation()) : "";
-
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(emoji + ChatColor.GOLD + " " + step.getCompassDescription(player)));
+            
+            MessageUtil.sendBossBarMessage(this,player, emoji + ChatColor.GOLD + " " + step.getCompassDescription(player));
         }))).runTaskTimer(QuestsPlugin.getInstance(), 0, 3);
     }
     
@@ -253,5 +254,10 @@ public class QuestsPlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
         recommendedConversation.getConversing().remove(event.getPlayer().getUniqueId());
+    }
+    
+    @Override
+    public String getBossBarId() {
+        return "quests";
     }
 }

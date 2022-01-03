@@ -1,5 +1,6 @@
 package me.sizzlemcgrizzle.quests;
 
+import net.minecraft.server.v1_16_R3.Entity;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,7 +13,7 @@ public class QuestProgress implements ConfigurationSerializable {
     private int stepID = 0;
     
     public QuestProgress() {
-    
+
     }
     
     public QuestProgress(Map<String, Object> map) {
@@ -36,15 +37,15 @@ public class QuestProgress implements ConfigurationSerializable {
         return stepID;
     }
     
+    public void setStepID(int stepID) {
+        this.stepID = stepID;
+    }
+    
     public int getCompletedWeight() {
         return completedWeight;
     }
     
     public void setCompletedWeight(int completedWeight) {
         this.completedWeight = completedWeight;
-    }
-    
-    public void setStepID(int stepID) {
-        this.stepID = stepID;
     }
 }
