@@ -16,11 +16,19 @@ import me.sizzlemcgrizzle.quests.dialogue.AvatarMessage;
 import me.sizzlemcgrizzle.quests.dialogue.RecommendedConversation;
 import me.sizzlemcgrizzle.quests.dialogue.command.AvatarCommandHandler;
 import me.sizzlemcgrizzle.quests.menu.QuestsOverviewMenu;
-import me.sizzlemcgrizzle.quests.steps.*;
+import me.sizzlemcgrizzle.quests.steps.QuestStep;
+import me.sizzlemcgrizzle.quests.steps.QuestStepAdminShopTrade;
+import me.sizzlemcgrizzle.quests.steps.QuestStepBlockInteract;
+import me.sizzlemcgrizzle.quests.steps.QuestStepBlueprintPlace;
+import me.sizzlemcgrizzle.quests.steps.QuestStepConditionalAbandon;
+import me.sizzlemcgrizzle.quests.steps.QuestStepMythicMobInteraction;
+import me.sizzlemcgrizzle.quests.steps.QuestStepMythicMobKill;
+import me.sizzlemcgrizzle.quests.steps.QuestStepNPCInteraction;
+import me.sizzlemcgrizzle.quests.steps.QuestStepPortalUse;
+import me.sizzlemcgrizzle.quests.steps.QuestStepWorldGuardAction;
 import me.sizzlemcgrizzle.quests.util.UserInputManager;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -121,24 +129,24 @@ public class QuestsPlugin extends JavaPlugin implements Listener, BossBarMessage
         Bukkit.getPluginManager().registerEvents(this, this);
         
         new LambdaRunnable(this::save).runTaskTimer(this, 36000, 36000);
-
+        
         new LambdaRunnable(() -> quests.forEach(quest ->
                 quest.getProgress().forEach((uuid, p) -> {
-
-            Player player = Bukkit.getPlayer(uuid);
-
-            if (player == null)
-                return;
-
-            if (quest.getSteps().isEmpty())
-                return;
-
-            QuestStep step = quest.getSteps().get(p.getStepID());
-
-            String emoji = step.isShowingCompass() && ResourcePackManager.getInstance().isFullyAccepted(player) ? NavigationUtil.getUnicode(player, step.getLocation()) : "";
-            
-            MessageUtil.sendBossBarMessage(this,player, emoji + ChatColor.GOLD + " " + step.getCompassDescription(player));
-        }))).runTaskTimer(QuestsPlugin.getInstance(), 0, 3);
+                    
+                    Player player = Bukkit.getPlayer(uuid);
+                    
+                    if (player == null)
+                        return;
+                    
+                    if (quest.getSteps().isEmpty())
+                        return;
+                    
+                    QuestStep step = quest.getSteps().get(p.getStepID());
+                    
+                    String emoji = step.isShowingCompass() && ResourcePackManager.getInstance().isFullyAccepted(player) ? NavigationUtil.getUnicode(player, step.getLocation()) : "";
+                    
+                    MessageUtil.sendBossBarMessage(this, player, emoji + ChatColor.GOLD + " " + step.getCompassDescription(player));
+                }))).runTaskTimer(QuestsPlugin.getInstance(), 0, 3);
     }
     
     @Override
