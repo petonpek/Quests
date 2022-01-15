@@ -87,7 +87,7 @@ public class QuestReward implements ConfigurationSerializable {
                     QuestsPlugin.getInstance().getUserInputManager().getInput(player, new UserInputManager.NumberInputPrompt("&bEnter a valid index to receive the item from.",
                             d -> d >= 0 && d < items.size(),
                             d -> {
-                                player.getInventory().addItem(items.get(d.intValue()));
+                                player.getInventory().addItem(items.get(d.intValue()).clone());
                                 display(player, questStep);
                             },
                             () -> display(player, questStep)));
@@ -195,7 +195,7 @@ public class QuestReward implements ConfigurationSerializable {
     }
     
     public void reward(Player player) {
-        items.forEach(item -> player.getInventory().addItem(item).forEach((integer, i) -> player.getWorld().dropItemNaturally(player.getLocation(), i)));
+        items.forEach(item -> player.getInventory().addItem(item.clone()).forEach((integer, i) -> player.getWorld().dropItemNaturally(player.getLocation(), i)));
         commands.forEach(c -> Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), c.replace("%player%", player.getName())));
         for (int i = 0; i < fireworks.size(); i++) {
             ItemStack firework = fireworks.get(i);
