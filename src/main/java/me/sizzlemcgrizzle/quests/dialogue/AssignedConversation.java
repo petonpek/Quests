@@ -73,30 +73,28 @@ public class AssignedConversation extends AvatarConversation {
     protected void createMenu() {
         super.createMenu();
         
-        MenuItem item = getConversationMenu().getInfoItem();
-        
-        item.setItem(new ItemBuilder(item.getItem()).setType(Material.EMERALD_BLOCK)
+        MenuItem item = new MenuItem(new ItemBuilder(getConversationMenu().getInfoItem().getItem()).setType(Material.EMERALD_BLOCK)
                 .addLore("&8→ &6Right click to add quest", "&8→ &6Shift left click to view quests", "&8→ &6Shift right click to remove quest").build());
         
         item.addClickAction(click -> {
-            Player player = click.getPlayer();
-            
-            if (quests.size() == 10) {
-                MessageUtil.sendMessage(QuestsPlugin.getInstance(), player, MessageLevel.INFO, "There are already 10 quests assigned.");
-                return;
-            }
-            
-            player.closeInventory();
-            
-            QuestsPlugin.getInstance().getUserInputManager().getInput(player, new UserInputManager.ObjectInputPrompt<>("&bEnter a valid quest that is not already assigned...",
-                    string -> quests.stream().anyMatch(q -> q.getId().equalsIgnoreCase(string)) ? Optional.empty() :
-                            QuestsPlugin.getInstance().getQuest(string),
-                    quest -> {
-                        quests.add(quest);
-                        
-                        display(player);
-                    }, () -> display(player)));
-        }, ClickType.RIGHT)
+                    Player player = click.getPlayer();
+                    
+                    if (quests.size() == 10) {
+                        MessageUtil.sendMessage(QuestsPlugin.getInstance(), player, MessageLevel.INFO, "There are already 10 quests assigned.");
+                        return;
+                    }
+                    
+                    player.closeInventory();
+                    
+                    QuestsPlugin.getInstance().getUserInputManager().getInput(player, new UserInputManager.ObjectInputPrompt<>("&bEnter a valid quest that is not already assigned...",
+                            string -> quests.stream().anyMatch(q -> q.getId().equalsIgnoreCase(string)) ? Optional.empty() :
+                                    QuestsPlugin.getInstance().getQuest(string),
+                            quest -> {
+                                quests.add(quest);
+                                
+                                display(player);
+                            }, () -> display(player)));
+                }, ClickType.RIGHT)
                 .addClickAction(click -> displayQuestMenu(click.getPlayer()), ClickType.SHIFT_LEFT)
                 .addClickAction(click -> {
                     Player player = click.getPlayer();
