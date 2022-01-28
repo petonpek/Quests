@@ -1,5 +1,6 @@
 package me.sizzlemcgrizzle.quests.steps;
 
+import de.craftlancer.core.Utils;
 import de.craftlancer.core.menu.MenuItem;
 import de.craftlancer.core.util.InventoryUtils;
 import de.craftlancer.core.util.ItemBuilder;
@@ -77,7 +78,7 @@ public abstract class QuestStepItem extends QuestStep {
         
         defaults.add(new MenuItem(new ItemBuilder(Material.CHEST).setDisplayName("&e&lSet Item")
                 .setLore("", "&7Current item: &6" + ((item == null || item.getType().isAir() ? "none" :
-                                "x" + item.getAmount() + " " + (item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName() : item.getType().name()))),
+                                "x" + item.getAmount() + " " + Utils.getItemDisplayName(item, item.getType().name()))),
                         "", "&8→ &6Click to set item in hand").build()).addClickAction(click -> {
             Player player = click.getPlayer();
             

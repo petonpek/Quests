@@ -1,6 +1,7 @@
 package me.sizzlemcgrizzle.quests;
 
 import de.craftlancer.core.LambdaRunnable;
+import de.craftlancer.core.Utils;
 import de.craftlancer.core.menu.Menu;
 import de.craftlancer.core.menu.MenuItem;
 import de.craftlancer.core.util.ItemBuilder;
@@ -69,11 +70,16 @@ public class QuestReward implements ConfigurationSerializable {
         int[] itemIndex = {0};
         MenuItem itemButton = new MenuItem(new ItemBuilder(Material.DIAMOND).setDisplayName("&e&lItem Rewards")
                 .setLore(items.stream()
-                        .map(itemStack -> ChatColor.GRAY + "" + itemIndex[0]++ + ": " + ChatColor.GOLD + (itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : itemStack.getType().name()))
+                        .map(itemStack -> ChatColor.GRAY + "" + itemIndex[0]++ + ": " + ChatColor.GOLD + (Utils.getItemDisplayName(itemStack, itemStack.getType().name())))
                         .collect(Collectors.toList()))
                 .addLore("", "&8→ &6Left click to add item", "&8→ &6Right click to receive item", "&8→ &6Shift right click to remove an item").build())
                 .addClickAction(click -> {
                     Player player = click.getPlayer();
+                    
+                    if (player.getInventory().getItemInMainHand().getType().isAir()) {
+                        MessageUtil.sendMessage(QuestsPlugin.getInstance(), player, MessageLevel.INFO, "You must hold an item.");
+                        return;
+                    }
                     
                     items.add(player.getInventory().getItemInMainHand().clone());
                     createMenu(questStep);
@@ -140,7 +146,7 @@ public class QuestReward implements ConfigurationSerializable {
         int[] fireworkIndex = {0};
         MenuItem fireworkButton = new MenuItem(new ItemBuilder(Material.FIREWORK_ROCKET).setDisplayName("&e&lFirework Rewards")
                 .setLore(fireworks.stream()
-                        .map(itemStack -> ChatColor.GRAY + "" + fireworkIndex[0]++ + ": " + ChatColor.GOLD + (itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : itemStack.getType().name()))
+                        .map(itemStack -> ChatColor.GRAY + "" + fireworkIndex[0]++ + ": " + ChatColor.GOLD + Utils.getItemDisplayName(itemStack, itemStack.getType().name()))
                         .collect(Collectors.toList()))
                 .addLore("", "&8→ &6Left click to add firework", "&8→ &6Right click to receive firework", "&8→ &6Shift right click to remove an firework").build())
                 .addClickAction(click -> {
