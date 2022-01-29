@@ -73,7 +73,7 @@ public class AssignedConversation extends AvatarConversation {
     protected void createMenu() {
         super.createMenu();
         
-        MenuItem item = new MenuItem(new ItemBuilder(getConversationMenu().getInfoItem().getItem()).setType(Material.EMERALD_BLOCK)
+        MenuItem item = getConversationMenu().getInfoItem().deepClone(i -> new ItemBuilder(i).setType(Material.EMERALD_BLOCK)
                 .addLore("&8→ &6Right click to add quest", "&8→ &6Shift left click to view quests", "&8→ &6Shift right click to remove quest").build());
         
         item.addClickAction(click -> {
