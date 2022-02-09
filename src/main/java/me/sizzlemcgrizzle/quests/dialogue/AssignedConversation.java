@@ -69,6 +69,10 @@ public class AssignedConversation extends AvatarConversation {
         return 21;
     }
     
+    public boolean removeQuest(Quest quest) {
+        return quests.remove(quest);
+    }
+    
     @Override
     protected void createMenu() {
         super.createMenu();

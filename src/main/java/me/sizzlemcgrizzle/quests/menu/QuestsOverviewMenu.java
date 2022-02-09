@@ -58,11 +58,11 @@ public class QuestsOverviewMenu {
                                     
                                     if (player.hasPermission(QuestsPlugin.CREATOR_PERMISSION)) {
                                         item.addClickAction(click -> {
-                                            Player p = click.getPlayer();
-                                            
-                                            if (p.hasPermission(QuestsPlugin.CREATOR_PERMISSION))
-                                                quest.getMenu().display(p);
-                                        }, ClickType.LEFT)
+                                                    Player p = click.getPlayer();
+                                                    
+                                                    if (p.hasPermission(QuestsPlugin.CREATOR_PERMISSION))
+                                                        quest.getMenu().display(p);
+                                                }, ClickType.LEFT)
                                                 .addClickAction(click -> {
                                                     Player p = click.getPlayer();
                                                     
@@ -90,6 +90,7 @@ public class QuestsOverviewMenu {
                                                     plugin.getUserInputManager().getInput(p, new UserInputManager.StringInputPrompt("&bEnter 'confirm' to delete quest.",
                                                             s -> s.equals("confirm"), s -> {
                                                         plugin.getQuests().remove(quest);
+                                                        plugin.getRecommendedConversation().removeQuest(quest);
                                                         playerMenus.remove(p.getUniqueId());
                                                         display(p);
                                                     }, () -> display(p)));

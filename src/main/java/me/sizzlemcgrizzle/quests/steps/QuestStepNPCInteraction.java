@@ -47,7 +47,6 @@ public class QuestStepNPCInteraction extends QuestStepItem {
         if (event.getNPC().getId() != id)
             return;
         
-        
         if (getQuest().canStartQuest(event.getClicker(), this))
             getQuest().start(event.getClicker());
         
