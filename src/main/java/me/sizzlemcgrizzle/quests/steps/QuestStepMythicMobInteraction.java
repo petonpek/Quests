@@ -9,6 +9,7 @@ import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
 import io.lumine.xikage.mythicmobs.mobs.MythicMob;
 import me.sizzlemcgrizzle.quests.Quest;
 import me.sizzlemcgrizzle.quests.QuestsPlugin;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -22,24 +23,33 @@ import java.util.Map;
 public class QuestStepMythicMobInteraction extends QuestStepItem {
     
     private MythicMob mythicMob;
+    private String internalName;
     
     public QuestStepMythicMobInteraction(Quest quest, Location location, ActiveMob active) {
         super(quest, location, new ItemStack(Material.AIR));
         
         this.mythicMob = active.getType();
+        this.internalName = mythicMob.getInternalName();
     }
     
     public QuestStepMythicMobInteraction(Map<String, Object> map) {
         super(map);
         
-        this.mythicMob = MythicMobs.inst().getMobManager().getMythicMob((String) map.get("name"));
+        this.internalName = (String) map.get("name");
+        this.mythicMob = MythicMobs.inst().getMobManager().getMythicMob(internalName);
+        
+        if (mythicMob == null)
+            MessageUtil.sendMessage(QuestsPlugin.getInstance(),
+                    Bukkit.getConsoleSender(),
+                    MessageLevel.WARNING,
+                    "Error: Mythic mob with name \"" + internalName + "\" does not exist in QuestStepMythicMobKill");
     }
     
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = super.serialize();
         
-        map.put("name", mythicMob.getInternalName());
+        map.put("name", internalName);
         
         return map;
     }
@@ -53,7 +63,7 @@ public class QuestStepMythicMobInteraction extends QuestStepItem {
         if (active == null)
             return;
         
-        if (!active.getType().equals(mythicMob))
+        if (mythicMob == null || !active.getType().equals(mythicMob))
             return;
         
         if (getQuest().canStartQuest(event.getPlayer(), this))
@@ -73,13 +83,14 @@ public class QuestStepMythicMobInteraction extends QuestStepItem {
         
         
         defaults.add(new MenuItem(new ItemBuilder(Material.SKELETON_SKULL).setDisplayName("&e&lChange Mythic Mob")
-                .setLore("", "&7Mythic mob name: &6" + mythicMob.getInternalName(), "", "&8→ &6Click to set mythic mob").build()).addClickAction(click -> {
+                .setLore("", "&7Mythic mob name: &6" + internalName, "", "&8→ &6Click to set mythic mob").build()).addClickAction(click -> {
             Player player = click.getPlayer();
             player.closeInventory();
             
             MessageUtil.sendMessage(QuestsPlugin.getInstance(), player, MessageLevel.INFO, "Select a mythic mob.");
             QuestsPlugin.getInstance().getUserInputManager().getMythicMobInput(player, (mob, active) -> {
                 mythicMob = mob;
+                internalName = mob.getInternalName();
                 
                 createMenu();
                 display(player);
