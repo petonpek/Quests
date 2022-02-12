@@ -1,15 +1,10 @@
 package me.sizzlemcgrizzle.quests;
 
-import de.craftlancer.core.LambdaRunnable;
-import de.craftlancer.core.navigation.NavigationUtil;
-import de.craftlancer.core.resourcepack.ResourcePackManager;
 import de.craftlancer.core.util.MessageUtil;
 import me.sizzlemcgrizzle.quests.menu.QuestStepsMenu;
 import me.sizzlemcgrizzle.quests.steps.InstantComplete;
 import me.sizzlemcgrizzle.quests.steps.QuestStep;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
@@ -28,8 +23,8 @@ public class Quest implements ConfigurationSerializable {
     private final String permission;
     private final List<String> description;
     private final List<QuestStep> steps;
-    private final Map<UUID, Long> completed;
-    private final Map<UUID, QuestProgress> progress;
+    private final Map<UUID, Long> completed = new HashMap<>();
+    private final Map<UUID, QuestProgress> progress = new HashMap<>();
     private ChatColor color;
     private boolean isPublic = false;
     private boolean isRepeatable = false;
@@ -44,8 +39,6 @@ public class Quest implements ConfigurationSerializable {
         this.id = id;
         this.permission = permission;
         this.steps = new ArrayList<>();
-        this.progress = new HashMap<>();
-        this.completed = new HashMap<>();
         this.description = new ArrayList<>();
         this.color = color;
         this.contentTeam = contentTeam;
@@ -56,12 +49,10 @@ public class Quest implements ConfigurationSerializable {
         this.color = ChatColor.of((String) map.getOrDefault("color", "DARK_PURPLE"));
         this.permission = (String) map.get("permission");
         this.steps = (List<QuestStep>) map.get("steps");
-        this.progress = ((Map<String, QuestProgress>) map.get("progress")).entrySet().stream()
-                .collect(Collectors.toMap(e -> UUID.fromString(e.getKey()), Map.Entry::getValue));
+        ((Map<String, QuestProgress>) map.get("progress")).forEach((id, p) -> progress.put(UUID.fromString(id), p));
+        ((Map<String, Long>) map.get("completed")).forEach((id, t) -> completed.put(UUID.fromString(id), t));
         this.isPublic = (boolean) map.get("isPublic");
         this.isRepeatable = (boolean) map.get("isRepeatable");
-        this.completed = ((Map<String, Long>) map.get("completed")).entrySet().stream()
-                .collect(Collectors.toMap(e -> UUID.fromString(e.getKey()), Map.Entry::getValue));
         this.description = (List<String>) map.get("description");
         this.timeout = (int) map.getOrDefault("timeout", 0);
         this.startAutomatically = (boolean) map.getOrDefault("startAutomatically", false);
@@ -85,7 +76,7 @@ public class Quest implements ConfigurationSerializable {
         if (withTimeout)
             completed.put(uuid, System.currentTimeMillis());
         
-        MessageUtil.sendBossBarMessage(QuestsPlugin.getInstance(), Bukkit.getPlayer(uuid),"Quest abandoned", 80);
+        MessageUtil.sendBossBarMessage(QuestsPlugin.getInstance(), Bukkit.getPlayer(uuid), "Quest abandoned", 80);
     }
     
     @NotNull
@@ -180,18 +171,18 @@ public class Quest implements ConfigurationSerializable {
             completed.put(player.getUniqueId(), System.currentTimeMillis());
             
             QuestsPlugin.getInstance().getQuestMenu().getPlayerMenus().remove(player.getUniqueId());
-    
-            MessageUtil.sendBossBarMessage(QuestsPlugin.getInstance(),player, ChatColor.GOLD + "Quest complete!", 80);
+            
+            MessageUtil.sendBossBarMessage(QuestsPlugin.getInstance(), player, ChatColor.GOLD + "Quest complete!", 80);
             return;
         }
-
+        
         QuestStep step = steps.get(nextStepID);
-
+        
         if (step instanceof InstantComplete) {
             step.onStepAction(player, step.getTotalWeight());
             nextStepID += 1;
         }
-
+        
         p.setCompletedWeight(0);
         p.setStepID(nextStepID);
     }
@@ -230,8 +221,7 @@ public class Quest implements ConfigurationSerializable {
         if (steps.isEmpty())
             return;
         
-        progress.put(player.getUniqueId(), new QuestProgress());
-        QuestsPlugin.getInstance().getQuestMenu().getPlayerMenus().remove(player.getUniqueId());
+        getProgress().put(player.getUniqueId(), new QuestProgress());
     }
     
     public QuestStepsMenu getMenu() {

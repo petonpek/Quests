@@ -26,26 +26,27 @@ import java.util.stream.Collectors;
 
 public class AssignedConversation extends AvatarConversation {
     
-    private List<Quest> quests;
+    private List<String> questNames = new ArrayList<>();
     
     public AssignedConversation(String id) {
         super(id);
         
         setOnComplete(player -> new LambdaRunnable(() -> {
-            if (!quests.isEmpty())
+            if (!questNames.isEmpty())
                 displayQuestMenu(player);
         }).runTaskLater(QuestsPlugin.getInstance(), 20));
-        
-        this.quests = new ArrayList<>();
     }
     
     public AssignedConversation(Map<String, Object> map) {
         super(map);
         
-        this.quests = (List<Quest>) map.get("quests");
+        if (map.containsKey("questNames"))
+            questNames = ((List<String>) map.get("questNames"));
+        else
+            questNames = ((List<Quest>) map.get("quests")).stream().map(Quest::getId).collect(Collectors.toList());
         
         setOnComplete(player -> new LambdaRunnable(() -> {
-            if (!quests.isEmpty())
+            if (!questNames.isEmpty())
                 displayQuestMenu(player);
         }).runTaskLater(QuestsPlugin.getInstance(), 20));
     }
@@ -55,13 +56,9 @@ public class AssignedConversation extends AvatarConversation {
     public Map<String, Object> serialize() {
         Map<String, Object> map = super.serialize();
         
-        map.put("quests", quests);
+        map.put("questNames", questNames);
         
         return map;
-    }
-    
-    public List<Quest> getQuests() {
-        return quests;
     }
     
     @Override
@@ -70,7 +67,23 @@ public class AssignedConversation extends AvatarConversation {
     }
     
     public boolean removeQuest(Quest quest) {
-        return quests.remove(quest);
+        return questNames.remove(quest.getId());
+    }
+    
+    public List<Quest> getAvailableQuests(Player player) {
+        List<Quest> list = new ArrayList<>();
+        
+        questNames.forEach(name -> QuestsPlugin.getInstance().getQuest(name).ifPresent(quest -> {
+            if (!quest.isPublic())
+                return;
+            
+            if (!quest.playerHasPermission(player))
+                return;
+            
+            list.add(quest);
+        }));
+        
+        return list;
     }
     
     @Override
@@ -83,7 +96,7 @@ public class AssignedConversation extends AvatarConversation {
         item.addClickAction(click -> {
                     Player player = click.getPlayer();
                     
-                    if (quests.size() == 10) {
+                    if (questNames.size() == 10) {
                         MessageUtil.sendMessage(QuestsPlugin.getInstance(), player, MessageLevel.INFO, "There are already 10 quests assigned.");
                         return;
                     }
@@ -91,10 +104,9 @@ public class AssignedConversation extends AvatarConversation {
                     player.closeInventory();
                     
                     QuestsPlugin.getInstance().getUserInputManager().getInput(player, new UserInputManager.ObjectInputPrompt<>("&bEnter a valid quest that is not already assigned...",
-                            string -> quests.stream().anyMatch(q -> q.getId().equalsIgnoreCase(string)) ? Optional.empty() :
-                                    QuestsPlugin.getInstance().getQuest(string),
+                            string -> questNames.contains(string) ? Optional.empty() : QuestsPlugin.getInstance().getQuest(string),
                             quest -> {
-                                quests.add(quest);
+                                questNames.add(quest.getId());
                                 
                                 display(player);
                             }, () -> display(player)));
@@ -103,7 +115,7 @@ public class AssignedConversation extends AvatarConversation {
                 .addClickAction(click -> {
                     Player player = click.getPlayer();
                     
-                    if (quests.size() == 0) {
+                    if (questNames.size() == 0) {
                         MessageUtil.sendMessage(QuestsPlugin.getInstance(), player, MessageLevel.INFO, "There are no quests assigned.");
                         return;
                     }
@@ -111,9 +123,9 @@ public class AssignedConversation extends AvatarConversation {
                     player.closeInventory();
                     
                     QuestsPlugin.getInstance().getUserInputManager().getInput(player, new UserInputManager.StringInputPrompt("&bEnter a valid quest...",
-                            string -> quests.stream().anyMatch(q -> q.getId().equalsIgnoreCase(string)),
+                            string -> questNames.contains(string),
                             s -> {
-                                quests.removeIf(q -> q.getId().equalsIgnoreCase(s));
+                                questNames.remove(s);
                                 
                                 display(player);
                             }, () -> display(player)));
@@ -123,7 +135,7 @@ public class AssignedConversation extends AvatarConversation {
     }
     
     public void displayQuestMenu(Player player) {
-        List<Quest> availableQuests = quests.stream().filter(q -> q.isPublic() && q.playerHasPermission(player)).collect(Collectors.toList());
+        List<Quest> availableQuests = getAvailableQuests(player);
         
         Menu menu = new Menu(QuestsPlugin.getInstance(),
                 ResourcePackManager.getInstance().isFullyAccepted(player) ?
